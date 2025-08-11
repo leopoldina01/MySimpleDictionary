@@ -14,5 +14,33 @@ mySimpleDictionary.Add(9, "Drugi element");
 mySimpleDictionary.Add(10, "Drugi element");
 mySimpleDictionary.Add(11, "Drugi element");
 mySimpleDictionary.Add(12, "Drugi element");
+string value = mySimpleDictionary[12];
+mySimpleDictionary[2] = "Petnaesti element";
 mySimpleDictionary.WriteAllElementsFromDictionary();
+if (mySimpleDictionary.ContainsKey(2))
+{
+    Console.WriteLine("Ima element sa kljucem 2");
+}
+
+if (mySimpleDictionary.ContainsValue("Drugi element"))
+{
+    Console.WriteLine("Ima vrednost 'Drugi element'");
+}
+
+int numOfElementsInDictionary = mySimpleDictionary.Count();
+Console.WriteLine("There are " + numOfElementsInDictionary + " elements in dictionary.");
+
+Console.WriteLine("Iteriranje kroz dictionary");
+foreach (var item in mySimpleDictionary)
+{
+    Console.WriteLine(item.Key + ": " + item.Value);
+}
+
+mySimpleDictionary.Remove(1);
+string removedValue;
+List<int> allKeys = mySimpleDictionary.Keys;
+List<string> allValues = mySimpleDictionary.Values;
+mySimpleDictionary.Remove(2, out removedValue);
+Console.WriteLine("Iteriranje kroz dictionary");
+mySimpleDictionary.Clear();
 Console.WriteLine("Hello, World!");
