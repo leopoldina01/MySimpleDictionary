@@ -6,35 +6,35 @@ using MySimpleDictionary.Model;
 BenchmarkRunner.Run<MySimpleDictionaryBenchmarkHelper>();
 
 MySimpleDictionary<int, string> mySimpleDictionary = new MySimpleDictionary<int, string>();
-mySimpleDictionary.Add(1, "Prvi element");
-mySimpleDictionary.Add(2, "Drugi element");
-mySimpleDictionary.Add(3, "Drugi element");
-mySimpleDictionary.Add(4, "Drugi element");
-mySimpleDictionary.Add(5, "Drugi element");
-mySimpleDictionary.Add(6, "Drugi element");
-mySimpleDictionary.Add(7, "Drugi element");
-mySimpleDictionary.Add(8, "Drugi element");
-mySimpleDictionary.Add(9, "Drugi element");
-mySimpleDictionary.Add(10, "Drugi element");
-mySimpleDictionary.Add(11, "Drugi element");
-mySimpleDictionary.Add(12, "Drugi element");
+mySimpleDictionary.Add(1, "First element");
+mySimpleDictionary.Add(2, "Second element");
+mySimpleDictionary.Add(3, "Third element");
+mySimpleDictionary.Add(4, "Fourth element");
+mySimpleDictionary.Add(5, "Fifth element");
+mySimpleDictionary.Add(6, "Sixth element");
+mySimpleDictionary.Add(7, "Seventh element");
+mySimpleDictionary.Add(8, "Eighth element");
+mySimpleDictionary.Add(9, "Nineth element");
+mySimpleDictionary.Add(10, "Tenth element");
+mySimpleDictionary.Add(11, "Eleventh element");
+mySimpleDictionary.Add(12, "Twelveth element");
 string value = mySimpleDictionary[12];
-mySimpleDictionary[2] = "Petnaesti element";
+mySimpleDictionary[2] = "Fifteenth element";
 mySimpleDictionary.WriteAllElementsFromDictionary();
 if (mySimpleDictionary.ContainsKey(2))
 {
-    Console.WriteLine("Ima element sa kljucem 2");
+    Console.WriteLine("There is element with key 2");
 }
 
-if (mySimpleDictionary.ContainsValue("Drugi element"))
+if (mySimpleDictionary.ContainsValue("Fifth element"))
 {
-    Console.WriteLine("Ima vrednost 'Drugi element'");
+    Console.WriteLine("There is value 'Fifth element'");
 }
 
 int numOfElementsInDictionary = mySimpleDictionary.Count();
 Console.WriteLine("There are " + numOfElementsInDictionary + " elements in dictionary.");
 
-Console.WriteLine("Iteriranje kroz dictionary");
+Console.WriteLine("Iteration through dictionary by foreach");
 foreach (var item in mySimpleDictionary)
 {
     Console.WriteLine(item.Key + ": " + item.Value);
@@ -48,9 +48,7 @@ int number = copyOfMySimpleDictionary.Count;
 List<int> allKeys = mySimpleDictionary.Keys;
 List<string> allValues = mySimpleDictionary.Values;
 mySimpleDictionary.Remove(2, out removedValue);
-Console.WriteLine("Iteriranje kroz dictionary");
 mySimpleDictionary.Clear();
-Console.WriteLine("Hello, World!");
 
 MySimpleDictionary<int, string> ienumerableDictionary = new MySimpleDictionary<int, string>
 {
@@ -58,7 +56,7 @@ MySimpleDictionary<int, string> ienumerableDictionary = new MySimpleDictionary<i
     { 2, "drugi" }
 };
 
-Console.WriteLine("Iteriranje kroz ienumerable dictionary");
+Console.WriteLine("Iterating through IEnumberable dictionary");
 foreach (var item in ienumerableDictionary)
 {
     Console.WriteLine(item.Key + ": " + item.Value);
