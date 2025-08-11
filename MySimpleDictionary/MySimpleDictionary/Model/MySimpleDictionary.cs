@@ -22,16 +22,15 @@ namespace MySimpleDictionary.Model
             public TValue Value;
         }
 
-        private int[] buckets; //mora se staviti inicijalna vrednost bucketa, obicno je 11
-        private Entry[] entries; //treba mi za listu entrija u bucketu
+        private int[] buckets; 
+        private Entry[] entries; 
         private int sizeOfBuckets; //ovo ce trebati ali ce se koristiti i kao sizeOfEntries jer su im iste dimenzije
-        private int numberOfEntries; //i ovo cemo videti dal ce mi trebati, ili nece
+        private int numberOfEntries; 
         private int freeList; //sadrzi indeks prvog elementa u free listi
         private int freeCount; //sadrzi broj elemenata koji su prazni
         private decimal loadFactor; //load Factor na osnovu kojeg ce se resizovati dictionary
         private decimal maxLoadFactor; //gornja granica load factora kada se predje resizuje se recnik (povecava)
         private int startFreeList; //pocetna vrednost za free list koja se koristi za racunanje pozicije sledeceg elementa u sledecoj listi
-        //kraj free liste oznacava -2
         private int totalNumberOfEntries; //ovde ide broj entrija koji nisu obrisani + broj entrija koji su obrisani (numberOfEntries + freeCount)
         public List<TKey> Keys { get; private set; } //lista svih kljuceva
         public List<TValue> Values { get; private set; } //lista svih vrednosti
@@ -51,7 +50,7 @@ namespace MySimpleDictionary.Model
 
         public MySimpleDictionary()
         {
-            sizeOfBuckets = 11; //inicijalna vrednost je 11, ne mora da bude, moze i nula, al da bismo izbegli 2-3 resiza na pocetku bas stavljamo 11
+            sizeOfBuckets = 11; //inicijalna vrednost je 11, ne mora da bude, moze i nula, al da bismo izbegli 2-3 resiza na pocetku stavljamo 11
             buckets = new int[sizeOfBuckets];
             entries = new Entry[sizeOfBuckets];
             freeList = -1;
@@ -171,10 +170,7 @@ namespace MySimpleDictionary.Model
 
         public void Add(TKey key, TValue value)
         {
-            //ovde treba da ide deo gde proverava da li je load factor veci od 0.75
-            //ako je veci prvo se uradi resize
-            //ako nije ide se dalje
-            if ((loadFactor >= 1 && freeCount == 0) || sizeOfBuckets == 0)
+            if ((loadFactor >= maxLoadFactor && freeCount == 0) || sizeOfBuckets == 0)
             {
                 Resize();
             }
@@ -187,10 +183,8 @@ namespace MySimpleDictionary.Model
 
             if (buckets[bucketIndex] == 0)
             {
-                //dakle prvo provera da li postoji elemenata u freeListi, tj dal ima gapova u entries listi
                 if (freeCount > 0 && freeList != -1)
                 {
-                    //ovde treba prvo zauzeti tu free poziciju (prethodno obrisanu)
                     buckets[bucketIndex] = freeList;
                     RemoveFromFreeList();
 
@@ -198,7 +192,6 @@ namespace MySimpleDictionary.Model
                 }
                 else
                 {
-                    //znaci linked lista na ovom bucketu je prazna
                     UpdateSizeOfEntries();
 
                     buckets[bucketIndex] = totalNumberOfEntries;
@@ -206,9 +199,6 @@ namespace MySimpleDictionary.Model
             }
             else
             {
-                //ovde ce trebati i provera da li vec postoji taj element isti u listi
-                //moze samo da se prodje kroz linked listu entrija
-                //ako se nalazi vec isti element u listi, tj isti key, onda treba baciti exception
                 bool alreadyInTheList = IsKeyAlreadyInTheList(key);
                 if (alreadyInTheList)
                 {
@@ -228,7 +218,6 @@ namespace MySimpleDictionary.Model
                 {
                     UpdateSizeOfEntries();
 
-                    //ovo ako vec ima linked lista u bucketu
                     next = buckets[bucketIndex] - 1;
                     buckets[bucketIndex] = totalNumberOfEntries;
                 }
@@ -241,7 +230,6 @@ namespace MySimpleDictionary.Model
 
         private void Resize()
         {
-            //za sada cu staviti da se size udupla, pa cu posle implementirati hashhelpers metodu
             int newSize = sizeOfBuckets * 2;
             newSize = PrimeNumbersHelper.GetFirstNextPrime(newSize);
             int[] resizedBuckets = new int[newSize];
@@ -251,7 +239,6 @@ namespace MySimpleDictionary.Model
 
             foreach (var entry in entries)
             {
-                //ovde treba da se dodaju elementi u resizedBuckets i resizedEntries
                 int hashCode = entry.HashCode;
                 int resizedBucketIndex = hashCode % newSize;
                 if (resizedBuckets[resizedBucketIndex] == 0)
@@ -275,7 +262,6 @@ namespace MySimpleDictionary.Model
                 resizedEntries[resizedIndex] = resizedEntry;
             }
 
-            //onda na kraju treba da se kopiraju u array buckets i entries
             buckets = new int[newSize];
             entries = new Entry[newSize];
 
@@ -290,10 +276,8 @@ namespace MySimpleDictionary.Model
 
         private void UpdateSizeOfEntries()
         {
-            //povecamo broj entries
             numberOfEntries++;
 
-            //povecavamo broj totalNumberOfEntries
             totalNumberOfEntries = numberOfEntries + freeCount;
         }
 
@@ -309,7 +293,6 @@ namespace MySimpleDictionary.Model
                     if (key.Equals(entries[elementNext].Key))
                     {
                         return true;
-                        //throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
                     }
                 }
                 elementNext = entries[elementNext].next;
@@ -320,9 +303,8 @@ namespace MySimpleDictionary.Model
 
         private void RemoveFromFreeList()
         {
-            //ovde se obracunava freeCount
-            freeCount--; //mora se smanjiti broj u freeCount
-            freeList = Math.Abs(entries[freeList].next) + startFreeList; //popunjava se trenutna vrednost freeListe pomera se pokazivac onda
+            freeCount--;
+            freeList = Math.Abs(entries[freeList].next) + startFreeList;
         }
 
         //funkcija za dodavanje entrija
@@ -338,17 +320,16 @@ namespace MySimpleDictionary.Model
             Values.Add(value);
         }
 
-        //jedna test funkcija za ispis elemenata cisto da vidimo kako radi dal se dodaju i brisu i ostalo
+        //jedna test funkcija za ispis elemenata cisto da vidimo kako radi dal se dodaju i brisu
         public void WriteAllElementsFromDictionary()
         {
             for (int i = 0; i < numberOfEntries; i++)
             {
-                //preskace obrisane elemente
                 if (entries[i].next < -1)
                 {
                     continue;
                 }
-                //ispisuje samo elemente koji nisu obrisani
+                
                 Console.WriteLine("Key: " + entries[i].Key + " Value: " + entries[i].Value);
             }
         }
@@ -462,12 +443,6 @@ namespace MySimpleDictionary.Model
             Keys = new List<TKey>();
             Values = new List<TValue>();
         }
-
-        //broj elemenata u dictionary
-        //public int Count()
-        //{
-        //    return numberOfEntries;
-        //}
 
         private int GetEntryByKey(TKey key)
         {
