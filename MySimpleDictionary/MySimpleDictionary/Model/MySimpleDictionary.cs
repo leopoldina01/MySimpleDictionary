@@ -237,7 +237,6 @@ namespace MySimpleDictionary.Model
             int entriesIndex = buckets[bucketIndex] - 1;
             AddEntry(hashCode, next, key, value, entriesIndex);
             loadFactor = Math.Round((decimal)numberOfEntries / sizeOfBuckets, 2);
-            Console.WriteLine(loadFactor);
         }
 
         private void Resize()

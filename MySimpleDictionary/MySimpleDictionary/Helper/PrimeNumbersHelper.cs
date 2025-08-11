@@ -12,6 +12,8 @@ namespace MySimpleDictionary.Helper
 
         static PrimeNumbersHelper()
         {
+            //ovu listu prostih brojeva sam nasla na internetu
+            //https://www.dotnetperls.com/prime
             primeNumbers = new int[]
             {
                 3, 7, 11, 17, 23, 29, 37,
@@ -68,6 +70,8 @@ namespace MySimpleDictionary.Helper
                 }
             }
 
+            //i ova ideja da se ide do poslednje int vrednosti je uzeta sa sajta
+            //https://www.dotnetperls.com/prime
             int maxIntPossible = 2147483647;
 
             for (int i = number; i < maxIntPossible; i++)

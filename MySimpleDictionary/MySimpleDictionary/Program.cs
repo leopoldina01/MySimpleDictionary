@@ -1,5 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using BenchmarkDotNet.Running;
+using MySimpleDictionary.Helper;
 using MySimpleDictionary.Model;
+
+BenchmarkRunner.Run<MySimpleDictionaryBenchmarkHelper>();
 
 MySimpleDictionary<int, string> mySimpleDictionary = new MySimpleDictionary<int, string>();
 mySimpleDictionary.Add(1, "Prvi element");
