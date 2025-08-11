@@ -14,7 +14,7 @@ namespace MySimpleDictionary.Model
 {
     public class MySimpleDictionary<TKey, TValue> : IEnumerable<(TKey Key, TValue Value)>
     {
-        private struct Entry
+        public struct Entry
         {
             public int HashCode;
             public int next;
@@ -30,12 +30,24 @@ namespace MySimpleDictionary.Model
         private int freeCount; //sadrzi broj elemenata koji su prazni
         private decimal loadFactor; //load Factor na osnovu kojeg ce se resizovati dictionary
         private decimal maxLoadFactor; //gornja granica load factora kada se predje resizuje se recnik (povecava)
-        private decimal minLoadFactor; //donja granica load factora kada se predje resizuje se recnik (smanjuje)
         private int startFreeList; //pocetna vrednost za free list koja se koristi za racunanje pozicije sledeceg elementa u sledecoj listi
         //kraj free liste oznacava -2
         private int totalNumberOfEntries; //ovde ide broj entrija koji nisu obrisani + broj entrija koji su obrisani (numberOfEntries + freeCount)
         public List<TKey> Keys { get; private set; } //lista svih kljuceva
         public List<TValue> Values { get; private set; } //lista svih vrednosti
+
+        //properties
+        public int[] Buckets { get { return buckets; } }
+        public Entry[] Entries { get { return entries; } }
+        public int SizeOfBuckets { get { return sizeOfBuckets; } }
+        public int NumberOfEntries { get { return numberOfEntries; } }
+        public int FreeList { get { return freeList; } }
+        public int FreeCount { get { return freeCount; } }
+        public decimal LoadFactor { get { return loadFactor; } }
+        public decimal MaxLoadFactor { get { return maxLoadFactor; } }
+        public int StartFreeList { get { return startFreeList; } }
+        public int TotalNumberOfEntries { get { return  totalNumberOfEntries; } }
+        public int Count { get { return numberOfEntries; } }
 
         public MySimpleDictionary()
         {
@@ -47,11 +59,75 @@ namespace MySimpleDictionary.Model
             loadFactor = 0;
             numberOfEntries = 0;
             maxLoadFactor = 0.75m;
-            minLoadFactor = 0.25m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
             Keys = new List<TKey>();
             Values = new List<TValue>();
+        }
+
+        //konstruktor kopije
+        public MySimpleDictionary(MySimpleDictionary<TKey, TValue> dictionary)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException("Dictionary can't be null!");
+            }
+
+            this.buckets = dictionary.Buckets;
+            this.entries = dictionary.Entries;
+            this.sizeOfBuckets = dictionary.SizeOfBuckets;
+            this.numberOfEntries = dictionary.NumberOfEntries;
+            this.freeList = dictionary.FreeList;
+            this.freeCount = dictionary.FreeCount; 
+            this.loadFactor = dictionary.LoadFactor; 
+            this.maxLoadFactor = dictionary.MaxLoadFactor; 
+            this.startFreeList = dictionary.StartFreeList; 
+            this.totalNumberOfEntries = dictionary.TotalNumberOfEntries;
+            this.Keys = dictionary.Keys; 
+            this.Values = dictionary.Values;
+        }
+
+        //konstruktor sa inicijalnim kapacitetom
+        public MySimpleDictionary(int capacity)
+        {
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException("Capacity can't be less than 0.");
+            }
+
+            sizeOfBuckets = capacity;
+            buckets = new int[sizeOfBuckets];
+            entries = new Entry[sizeOfBuckets];
+            freeList = -1;
+            freeCount = 0;
+            loadFactor = 0;
+            numberOfEntries = 0;
+            maxLoadFactor = 0.75m;
+            totalNumberOfEntries = 0;
+            startFreeList = -3;
+            Keys = new List<TKey>();
+            Values = new List<TValue>();
+        }
+
+        //konstruckor sa prosledjenim collectionom
+        public MySimpleDictionary(IEnumerable<(TKey key, TValue value)> collection)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException("Collection shouldn't be null.");
+            }
+
+            foreach (var item in collection)
+            {
+                try
+                {
+                    Add(item.key, item.value);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException("There is double key in collection.", ex);
+                }
+            }
         }
 
         //pristup elementu
@@ -61,7 +137,7 @@ namespace MySimpleDictionary.Model
             {
                 if (key == null)
                 {
-                    throw new ArgumentNullException("Key shouldn be null!");
+                    throw new ArgumentNullException("Key shouldn't be null!");
                 }
                 bool isKeyInTheDictionary = IsKeyAlreadyInTheList(key);
                 if (isKeyInTheDictionary)
@@ -78,7 +154,7 @@ namespace MySimpleDictionary.Model
             {
                 if (key == null)
                 {
-                    throw new ArgumentNullException("Key shouldn be null!");
+                    throw new ArgumentNullException("Key shouldn't be null!");
                 }
                 bool isKeyInTheDictionary = IsKeyAlreadyInTheList(key);
                 if (isKeyInTheDictionary)
@@ -98,7 +174,7 @@ namespace MySimpleDictionary.Model
             //ovde treba da ide deo gde proverava da li je load factor veci od 0.75
             //ako je veci prvo se uradi resize
             //ako nije ide se dalje
-            if (loadFactor >= 1 && freeCount == 0)
+            if ((loadFactor >= 1 && freeCount == 0) || sizeOfBuckets == 0)
             {
                 Resize();
             }
@@ -389,10 +465,10 @@ namespace MySimpleDictionary.Model
         }
 
         //broj elemenata u dictionary
-        public int Count()
-        {
-            return numberOfEntries;
-        }
+        //public int Count()
+        //{
+        //    return numberOfEntries;
+        //}
 
         private int GetEntryByKey(TKey key)
         {

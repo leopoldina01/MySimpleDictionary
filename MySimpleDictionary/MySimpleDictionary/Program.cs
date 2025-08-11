@@ -38,9 +38,24 @@ foreach (var item in mySimpleDictionary)
 
 mySimpleDictionary.Remove(1);
 string removedValue;
+MySimpleDictionary<int, string> copyOfMySimpleDictionary = new MySimpleDictionary<int, string>(mySimpleDictionary);
+MySimpleDictionary<int, string> capacityDictionary = new MySimpleDictionary<int, string>(4);
+int number = copyOfMySimpleDictionary.Count;
 List<int> allKeys = mySimpleDictionary.Keys;
 List<string> allValues = mySimpleDictionary.Values;
 mySimpleDictionary.Remove(2, out removedValue);
 Console.WriteLine("Iteriranje kroz dictionary");
 mySimpleDictionary.Clear();
 Console.WriteLine("Hello, World!");
+
+MySimpleDictionary<int, string> ienumerableDictionary = new MySimpleDictionary<int, string>
+{
+    { 1, "prvi" },
+    { 2, "drugi" }
+};
+
+Console.WriteLine("Iteriranje kroz ienumerable dictionary");
+foreach (var item in ienumerableDictionary)
+{
+    Console.WriteLine(item.Key + ": " + item.Value);
+}
