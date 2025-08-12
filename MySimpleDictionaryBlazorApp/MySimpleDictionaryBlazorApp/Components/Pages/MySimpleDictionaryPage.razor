@@ -1,0 +1,118 @@
+﻿@page "/"
+@inject ISnackbar Snackbar
+
+<div class="d-flex flex-wrap mt-4 mb-4">
+    <MudButton OnClick="@AddItem" Variant="Variant.Filled" Color="@Color.Primary" Class="add-item-btn">Add Item</MudButton>
+    <MudButton OnClick="@Clear" Variant="Variant.Filled" Color="@Color.Primary" Class="add-item-btn">Clear All</MudButton>
+</div>
+
+@if (addItemClicked)
+{
+    <MudCard class="d-flex flex-wrap mt-4 mb-8">
+        <MudForm @ref="form">
+            <MudCardContent>
+                <MudTextField @bind-Value="newKey"
+                              Immediate="true"
+                              Label="Key" />
+                <MudTextField @bind-Value="newValue"
+                              Immediate="true"
+                              Label="Value" />
+            </MudCardContent>
+        </MudForm>
+        <MudPaper Class="pa-4 mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" Class="add-item-btn" OnClick="@Cancel">Cancel</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="add-item-btn" OnClick="@Submit">Add</MudButton>
+        </MudPaper>
+    </MudCard>
+}
+
+<MudDataGrid Items="@dictionaryToShow">
+    <Columns>
+        <PropertyColumn Property="x => x.Key" Title="Key"/>
+        <PropertyColumn Property="x => x.Value" Title="Value"/>
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudIconButton OnClick="@(() => Delete(context.Item.Key))" Icon="@Icons.Material.Filled.Delete" Color="@Color.Primary">Remove</MudIconButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private MudForm form;
+
+    public static MySimpleDictionary<int, string> dictionaryToShow = new MySimpleDictionary<int, string>()
+    {
+        {1, "prvi"},
+        {2, "drugi"}
+    };
+
+    private int newKey;
+    private string newValue;
+    private bool addItemClicked = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    private void AddItem()
+    {
+        addItemClicked = true;
+    }
+
+    private void Delete(int key)
+    {
+        try
+        {
+            dictionaryToShow.Remove(key);
+            Snackbar.Add("Item was removed successfully", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Error while removin item", Severity.Error);
+        }
+        dictionaryToShow.Remove(key);
+    }
+
+    private void Clear()
+    {
+        try
+        {
+            dictionaryToShow.Clear();
+            Snackbar.Add("Dictionary was cleared successfully", Severity.Success);
+        }
+        catch
+        {
+            Snackbar.Add("Error while clearing dictionary", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        addItemClicked = false;
+    }
+
+    private void Submit()
+    {
+        try
+        {
+            if (form.IsValid)
+            {
+                dictionaryToShow[newKey] = newValue;
+                Snackbar.Add("Item added successfully", Severity.Success);
+                addItemClicked = false;
+            }
+            else
+            {
+                Snackbar.Add("Key is not of a valid type.", Severity.Warning);
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            //show message
+            Snackbar.Add("There is already this key in the dictionary.", Severity.Error);
+        }
+    }
+}

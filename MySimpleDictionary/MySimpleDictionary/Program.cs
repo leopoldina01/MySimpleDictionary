@@ -62,3 +62,15 @@ foreach (var item in ienumerableDictionary)
 {
     Console.WriteLine(item.Key + ": " + item.Value);
 }
+
+MySimpleDictionary<string, string> mySimpleDictionaryString = new MySimpleDictionary<string, string>();
+mySimpleDictionaryString.Add("prvi", "First element");
+mySimpleDictionaryString.Add("drugi", "Second element");
+mySimpleDictionaryString.Add("treci", "Third element");
+mySimpleDictionaryString.Add("cetvrti", "Fourth element");
+mySimpleDictionaryString.Add("prvi", "Ponovljeni");
+
+foreach (var item in mySimpleDictionaryString)
+{
+    Console.WriteLine(item.Key + ": " + item.Value);
+}

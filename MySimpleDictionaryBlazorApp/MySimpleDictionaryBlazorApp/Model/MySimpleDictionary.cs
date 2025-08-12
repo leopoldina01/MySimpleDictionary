@@ -1,16 +1,8 @@
-﻿using Microsoft.Internal.VisualStudio.Shell;
-using MySimpleDictionary.Helper;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using MySimpleDictionaryBlazorApp.Helper;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace MySimpleDictionary.Model
+namespace MySimpleDictionaryBlazorApp.Model
 {
     public class MySimpleDictionary<TKey, TValue> : IEnumerable<(TKey Key, TValue Value)>
     {
@@ -22,10 +14,10 @@ namespace MySimpleDictionary.Model
             public TValue Value;
         }
 
-        private int[] buckets; 
-        private Entry[] entries; 
+        private int[] buckets;
+        private Entry[] entries;
         private int sizeOfBuckets; //ovo ce trebati ali ce se koristiti i kao sizeOfEntries jer su im iste dimenzije
-        private int numberOfEntries; 
+        private int numberOfEntries;
         private int freeList; //sadrzi indeks prvog elementa u free listi
         private int freeCount; //sadrzi broj elemenata koji su prazni
         private decimal loadFactor; //load Factor na osnovu kojeg ce se resizovati dictionary
@@ -45,7 +37,7 @@ namespace MySimpleDictionary.Model
         public decimal LoadFactor { get { return loadFactor; } }
         public decimal MaxLoadFactor { get { return maxLoadFactor; } }
         public int StartFreeList { get { return startFreeList; } }
-        public int TotalNumberOfEntries { get { return  totalNumberOfEntries; } }
+        public int TotalNumberOfEntries { get { return totalNumberOfEntries; } }
         public int Count { get { return numberOfEntries; } }
 
         public MySimpleDictionary()
@@ -77,12 +69,12 @@ namespace MySimpleDictionary.Model
             this.sizeOfBuckets = dictionary.SizeOfBuckets;
             this.numberOfEntries = dictionary.NumberOfEntries;
             this.freeList = dictionary.FreeList;
-            this.freeCount = dictionary.FreeCount; 
-            this.loadFactor = dictionary.LoadFactor; 
-            this.maxLoadFactor = dictionary.MaxLoadFactor; 
-            this.startFreeList = dictionary.StartFreeList; 
+            this.freeCount = dictionary.FreeCount;
+            this.loadFactor = dictionary.LoadFactor;
+            this.maxLoadFactor = dictionary.MaxLoadFactor;
+            this.startFreeList = dictionary.StartFreeList;
             this.totalNumberOfEntries = dictionary.TotalNumberOfEntries;
-            this.Keys = dictionary.Keys; 
+            this.Keys = dictionary.Keys;
             this.Values = dictionary.Values;
         }
 
@@ -182,7 +174,6 @@ namespace MySimpleDictionary.Model
 
             //racunanje hash koda od keya
             int hashCode = key.GetHashCode();
-            Console.WriteLine("Hash Code " +  hashCode);
             int bucketIndex;
             int reminder = hashCode % sizeOfBuckets;
             if (reminder < 0)
@@ -193,9 +184,7 @@ namespace MySimpleDictionary.Model
             {
                 bucketIndex = reminder;
             }
-                //bucketIndex = Math.Abs(hashCode) % sizeOfBuckets;
-            Console.WriteLine("Bucket index " + hashCode % sizeOfBuckets);
-            Console.WriteLine("Bucket index " +  bucketIndex);
+            
             int next = -1;
             int pointerInBucket = 0;
 
@@ -312,7 +301,6 @@ namespace MySimpleDictionary.Model
             {
                 bucketIndex = reminder;
             }
-            //int bucketIndex = Math.Abs(hashCode) % sizeOfBuckets;
             int elementNext = buckets[bucketIndex] - 1;
             while (elementNext != -1)
             {
@@ -357,8 +345,8 @@ namespace MySimpleDictionary.Model
                 {
                     continue;
                 }
-                
-                Console.WriteLine("Key: " + entries[i].Key + " Value: " + entries[i].Value);
+
+                //Console.WriteLine("Key: " + entries[i].Key + " Value: " + entries[i].Value);
             }
         }
 
@@ -376,7 +364,6 @@ namespace MySimpleDictionary.Model
             {
                 bucketIndex = reminder;
             }
-            //int bucketIndex = Math.Abs(hashCode) % sizeOfBuckets;
             bool containsKey = IsKeyAlreadyInTheList(key);
             return containsKey;
         }
@@ -418,7 +405,6 @@ namespace MySimpleDictionary.Model
             {
                 bucketIndex = reminder;
             }
-            //int bucketIndex = Math.Abs(hashCode) % sizeOfBuckets;
             bool containsKey = IsKeyAlreadyInTheList(key);
 
             if (!containsKey)
@@ -505,7 +491,6 @@ namespace MySimpleDictionary.Model
             {
                 bucketIndex = reminder;
             }
-            //int bucketIndex = Math.Abs(hashCode) % sizeOfBuckets;
             int next = buckets[bucketIndex] - 1;
             while (next != -1)
             {
