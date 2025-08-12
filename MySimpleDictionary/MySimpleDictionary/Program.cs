@@ -56,6 +56,7 @@ MySimpleDictionary<int, string> ienumerableDictionary = new MySimpleDictionary<i
     { 2, "drugi" }
 };
 
+string vrednost = ienumerableDictionary[2];
 Console.WriteLine("Iterating through IEnumberable dictionary");
 foreach (var item in ienumerableDictionary)
 {

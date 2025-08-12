@@ -170,6 +170,11 @@ namespace MySimpleDictionary.Model
 
         public void Add(TKey key, TValue value)
         {
+            if (key == null)
+            {
+                throw new ArgumentNullException("Key shouldn't be null");
+            }
+
             if ((loadFactor >= maxLoadFactor && freeCount == 0) || sizeOfBuckets == 0)
             {
                 Resize();
