@@ -34,8 +34,16 @@ namespace MySimpleDictionary.Model
         private int totalNumberOfEntries; //ovde ide broj entrija koji nisu obrisani + broj entrija koji su obrisani (numberOfEntries + freeCount)
         private bool hasCustomComparer;
         private IEqualityComparer<TKey> comparer;
-        public List<TKey> Keys { get ; private set; } //lista svih kljuceva
-        public List<TValue> Values { get; private set; } //lista svih vrednosti
+        public List<TKey> Keys { get
+            {
+                return GetAllKeys();
+            } 
+        } //lista svih kljuceva
+        public List<TValue> Values { get
+            {
+                return GetAllValues();
+            }
+        } //lista svih vrednosti
 
         //properties
         public int[] Buckets { get { return buckets; } }
@@ -64,8 +72,6 @@ namespace MySimpleDictionary.Model
             maxLoadFactor = 0.75m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
             hasCustomComparer = false;
         }
 
@@ -87,8 +93,6 @@ namespace MySimpleDictionary.Model
             this.maxLoadFactor = dictionary.MaxLoadFactor;
             this.startFreeList = dictionary.StartFreeList;
             this.totalNumberOfEntries = dictionary.TotalNumberOfEntries;
-            this.Keys = dictionary.Keys;
-            this.Values = dictionary.Values;
             hasCustomComparer = false;
         }
 
@@ -110,8 +114,6 @@ namespace MySimpleDictionary.Model
             maxLoadFactor = 0.75m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
             hasCustomComparer = false;
         }
 
@@ -133,8 +135,6 @@ namespace MySimpleDictionary.Model
             maxLoadFactor = 0.75m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
             hasCustomComparer = false;
             foreach (var item in collection)
             {
@@ -162,8 +162,6 @@ namespace MySimpleDictionary.Model
             maxLoadFactor = 0.75m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
             if (comparer != null)
             {
                 this.comparer = comparer;
@@ -193,8 +191,6 @@ namespace MySimpleDictionary.Model
             this.maxLoadFactor = dictionary.MaxLoadFactor;
             this.startFreeList = dictionary.StartFreeList;
             this.totalNumberOfEntries = dictionary.TotalNumberOfEntries;
-            this.Keys = dictionary.Keys;
-            this.Values = dictionary.Values;
             if (comparer != null)
             {
                 this.comparer = comparer;
@@ -224,8 +220,6 @@ namespace MySimpleDictionary.Model
             maxLoadFactor = 0.75m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
             if (comparer != null)
             {
                 hasCustomComparer = true;
@@ -267,8 +261,6 @@ namespace MySimpleDictionary.Model
             maxLoadFactor = 0.75m;
             totalNumberOfEntries = 0;
             startFreeList = -3;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
             if (comparer != null)
             {
                 hasCustomComparer = true;
@@ -649,8 +641,6 @@ namespace MySimpleDictionary.Model
             loadFactor = 0;
             numberOfEntries = 0;
             totalNumberOfEntries = 0;
-            Keys = new List<TKey>();
-            Values = new List<TValue>();
         }
 
         private int GetEntryByKey(TKey key)
@@ -725,6 +715,32 @@ namespace MySimpleDictionary.Model
                 equality = key1.Equals(key2);
             }
             return equality;
+        }
+
+        private List<TKey> GetAllKeys()
+        {
+            List<TKey> keys = new List<TKey>();
+            for (int i = 0; i < totalNumberOfEntries; i++)
+            {
+                if (entries[i].next > -2)
+                {
+                    keys.Add(entries[i].Key);
+                }
+            }
+            return keys;
+        }
+
+        private List<TValue> GetAllValues()
+        {
+            List<TValue> values = new List<TValue>();
+            for (int i = 0; i < totalNumberOfEntries; i++)
+            {
+                if (entries[i].next > -2)
+                {
+                    values.Add(entries[i].Value);
+                }
+            }
+            return values;
         }
     }
 }

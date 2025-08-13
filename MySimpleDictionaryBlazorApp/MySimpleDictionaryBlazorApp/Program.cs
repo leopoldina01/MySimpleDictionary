@@ -1,10 +1,15 @@
 using BenchmarkDotNet.Running;
+using MudBlazor;
 using MudBlazor.Services;
 using MySimpleDictionaryBlazorApp.Components;
 using MySimpleDictionaryBlazorApp.Helper;
-using MudBlazor;
+using MySimpleDictionaryBlazorApp.Model;
 
 BenchmarkRunner.Run<MySimpleDictionaryBenchmarkHelper>();
+
+//provera da li radi u konzoli----------------------------------------------------------------------
+
+//provera da li radi u konzoli----------------------------------------------------------------------
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,3 +50,5 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+

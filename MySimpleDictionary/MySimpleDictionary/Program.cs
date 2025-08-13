@@ -82,3 +82,10 @@ equalityDictionary.Add("treci", "Third element");
 equalityDictionary.Add("cetvrti", "Fourth element");
 //equalityDictionary.Add("PRVI", "should throw an error");
 Console.WriteLine("puca ovdeee");
+
+List<string> values = equalityDictionary.Values;
+
+foreach (var key in values)
+{
+    Console.WriteLine(key);
+}
