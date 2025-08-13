@@ -24,6 +24,8 @@ namespace MySimpleDictionaryBlazorApp.Model
         private decimal maxLoadFactor; //gornja granica load factora kada se predje resizuje se recnik (povecava)
         private int startFreeList; //pocetna vrednost za free list koja se koristi za racunanje pozicije sledeceg elementa u sledecoj listi
         private int totalNumberOfEntries; //ovde ide broj entrija koji nisu obrisani + broj entrija koji su obrisani (numberOfEntries + freeCount)
+        private bool hasCustomComparer;
+        private IEqualityComparer<TKey> comparer;
         public List<TKey> Keys { get; private set; } //lista svih kljuceva
         public List<TValue> Values { get; private set; } //lista svih vrednosti
 
@@ -39,6 +41,8 @@ namespace MySimpleDictionaryBlazorApp.Model
         public int StartFreeList { get { return startFreeList; } }
         public int TotalNumberOfEntries { get { return totalNumberOfEntries; } }
         public int Count { get { return numberOfEntries; } }
+        public int Capacity { get { return sizeOfBuckets; } }
+        public IEqualityComparer<TKey> Comparer { get { return comparer; } }
 
         public MySimpleDictionary()
         {
@@ -54,6 +58,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             startFreeList = -3;
             Keys = new List<TKey>();
             Values = new List<TValue>();
+            hasCustomComparer = false;
         }
 
         //konstruktor kopije
@@ -76,6 +81,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             this.totalNumberOfEntries = dictionary.TotalNumberOfEntries;
             this.Keys = dictionary.Keys;
             this.Values = dictionary.Values;
+            hasCustomComparer = false;
         }
 
         //konstruktor sa inicijalnim kapacitetom
@@ -98,6 +104,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             startFreeList = -3;
             Keys = new List<TKey>();
             Values = new List<TValue>();
+            hasCustomComparer = false;
         }
 
         //konstruckor sa prosledjenim collectionom
@@ -106,6 +113,120 @@ namespace MySimpleDictionaryBlazorApp.Model
             if (collection == null)
             {
                 throw new ArgumentNullException("Collection shouldn't be null.");
+            }
+
+            sizeOfBuckets = 1;
+            buckets = new int[sizeOfBuckets];
+            entries = new Entry[sizeOfBuckets];
+            freeList = -1;
+            freeCount = 0;
+            loadFactor = 0;
+            numberOfEntries = 0;
+            maxLoadFactor = 0.75m;
+            totalNumberOfEntries = 0;
+            startFreeList = -3;
+            Keys = new List<TKey>();
+            Values = new List<TValue>();
+            hasCustomComparer = false;
+
+            foreach (var item in collection)
+            {
+                try
+                {
+                    Add(item.key, item.value);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException("There is double key in collection.", ex);
+                }
+            }
+        }
+
+        //konstruktor sa prosledjenim Equality comparerom
+        public MySimpleDictionary(IEqualityComparer<TKey>? comparer)
+        {
+            sizeOfBuckets = 11; //inicijalna vrednost je 11, ne mora da bude, moze i nula, al da bismo izbegli 2-3 resiza na pocetku stavljamo 11
+            buckets = new int[sizeOfBuckets];
+            entries = new Entry[sizeOfBuckets];
+            freeList = -1;
+            freeCount = 0;
+            loadFactor = 0;
+            numberOfEntries = 0;
+            maxLoadFactor = 0.75m;
+            totalNumberOfEntries = 0;
+            startFreeList = -3;
+            Keys = new List<TKey>();
+            Values = new List<TValue>();
+            if (comparer != null)
+            {
+                this.comparer = comparer;
+                hasCustomComparer = true;
+            }
+            else
+            {
+                hasCustomComparer = false;
+            }
+        }
+
+        //konstruktor kopije sa equality comparerom
+        public MySimpleDictionary(MySimpleDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey>? comparer)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException("Dictionary can't be null!");
+            }
+
+            this.buckets = dictionary.Buckets;
+            this.entries = dictionary.Entries;
+            this.sizeOfBuckets = dictionary.SizeOfBuckets;
+            this.numberOfEntries = dictionary.NumberOfEntries;
+            this.freeList = dictionary.FreeList;
+            this.freeCount = dictionary.FreeCount;
+            this.loadFactor = dictionary.LoadFactor;
+            this.maxLoadFactor = dictionary.MaxLoadFactor;
+            this.startFreeList = dictionary.StartFreeList;
+            this.totalNumberOfEntries = dictionary.TotalNumberOfEntries;
+            this.Keys = dictionary.Keys;
+            this.Values = dictionary.Values;
+            if (comparer != null)
+            {
+                this.comparer = comparer;
+                hasCustomComparer = true;
+            }
+            else
+            {
+                hasCustomComparer = false;
+            }
+        }
+
+        //konstruktor sa ienumerable kolekcijom i definisanim equality comparerom
+        public MySimpleDictionary(IEnumerable<(TKey key, TValue value)> collection, IEqualityComparer<TKey>? comparer)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException("Collection shouldn't be null.");
+            }
+
+            sizeOfBuckets = 1;
+            buckets = new int[sizeOfBuckets];
+            entries = new Entry[sizeOfBuckets];
+            freeList = -1;
+            freeCount = 0;
+            loadFactor = 0;
+            numberOfEntries = 0;
+            maxLoadFactor = 0.75m;
+            totalNumberOfEntries = 0;
+            startFreeList = -3;
+            Keys = new List<TKey>();
+            Values = new List<TValue>();
+            if (comparer != null)
+            {
+                hasCustomComparer = true;
+                this.comparer = comparer;
+            }
+            else
+            {
+                hasCustomComparer = false;
             }
 
             foreach (var item in collection)
@@ -118,6 +239,37 @@ namespace MySimpleDictionaryBlazorApp.Model
                 {
                     throw new ArgumentException("There is double key in collection.", ex);
                 }
+            }
+        }
+
+        //konstruktor sa prosledjenim kapacitetom i equality comparerom
+        public MySimpleDictionary(int capacity, IEqualityComparer<TKey>? comparer)
+        {
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException("Capacity can't be less than 0.");
+            }
+
+            sizeOfBuckets = capacity;
+            buckets = new int[sizeOfBuckets];
+            entries = new Entry[sizeOfBuckets];
+            freeList = -1;
+            freeCount = 0;
+            loadFactor = 0;
+            numberOfEntries = 0;
+            maxLoadFactor = 0.75m;
+            totalNumberOfEntries = 0;
+            startFreeList = -3;
+            Keys = new List<TKey>();
+            Values = new List<TValue>();
+            if (comparer != null)
+            {
+                hasCustomComparer = true;
+                this.comparer = comparer;
+            }
+            else
+            {
+                hasCustomComparer = false;
             }
         }
 
@@ -172,8 +324,9 @@ namespace MySimpleDictionaryBlazorApp.Model
                 Resize();
             }
 
-            //racunanje hash koda od keya
-            int hashCode = key.GetHashCode();
+            int hashCode = GetHashCodeForKey(key);
+
+            Console.WriteLine("Hash Code " + hashCode);
             int bucketIndex;
             int reminder = hashCode % sizeOfBuckets;
             if (reminder < 0)
@@ -290,7 +443,7 @@ namespace MySimpleDictionaryBlazorApp.Model
 
         private bool IsKeyAlreadyInTheList(TKey key)
         {
-            int hashCode = key.GetHashCode();
+            int hashCode = GetHashCodeForKey(key);
             int reminder = hashCode % sizeOfBuckets;
             int bucketIndex;
             if (reminder < 0)
@@ -306,7 +459,8 @@ namespace MySimpleDictionaryBlazorApp.Model
             {
                 if (hashCode == entries[elementNext].HashCode)
                 {
-                    if (key.Equals(entries[elementNext].Key))
+                    bool equality = GetEqualityForKey(key, entries[elementNext].Key);
+                    if (equality)
                     {
                         return true;
                     }
@@ -353,7 +507,7 @@ namespace MySimpleDictionaryBlazorApp.Model
         //provera da li postoji kljuc
         public bool ContainsKey(TKey key)
         {
-            int hashCode = key.GetHashCode();
+            int hashCode = GetHashCodeForKey(key);
             int reminder = hashCode % sizeOfBuckets;
             int bucketIndex;
             if (reminder < 0)
@@ -394,7 +548,7 @@ namespace MySimpleDictionaryBlazorApp.Model
                 throw new ArgumentNullException("Key is null");
             }
 
-            int hashCode = key.GetHashCode();
+            int hashCode = GetHashCodeForKey(key);
             int reminder = hashCode % sizeOfBuckets;
             int bucketIndex;
             if (reminder < 0)
@@ -414,8 +568,10 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             int current = buckets[bucketIndex] - 1;
             int before = -1;
+
+            bool equality = GetEqualityForKey(entries[current].Key, key);
             //prvo proverimo prvi element on ako nije bice pokazivac na before, ako jeste samo ce buckets[bucketIndex] = entries[next].next
-            if (entries[current].HashCode == hashCode && entries[current].Key.Equals(key))
+            if (entries[current].HashCode == hashCode && equality)
             {
                 RemoveEntry(bucketIndex, current, key);
                 return true;
@@ -429,7 +585,8 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             while (current != -1)
             {
-                if (entries[current].HashCode == hashCode && entries[current].Key.Equals(key))
+                bool equalityCurrent = GetEqualityForKey(entries[current].Key, key);
+                if (entries[current].HashCode == hashCode && equalityCurrent)
                 {
                     RemoveEntry(bucketIndex, current, key);
                     break;
@@ -480,7 +637,7 @@ namespace MySimpleDictionaryBlazorApp.Model
 
         private int GetEntryByKey(TKey key)
         {
-            int hashCode = key.GetHashCode();
+            int hashCode = GetHashCodeForKey(key);
             int reminder = hashCode % sizeOfBuckets;
             int bucketIndex;
             if (reminder < 0)
@@ -494,10 +651,12 @@ namespace MySimpleDictionaryBlazorApp.Model
             int next = buckets[bucketIndex] - 1;
             while (next != -1)
             {
-                if (entries[next].HashCode == hashCode && entries[next].Key.Equals(key))
+                bool equality = GetEqualityForKey(entries[next].Key, key);
+                if (entries[next].HashCode == hashCode && equality)
                 {
                     return next;
                 }
+                next = entries[next].next;
             }
             return -1;
         }
@@ -517,6 +676,35 @@ namespace MySimpleDictionaryBlazorApp.Model
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        private int GetHashCodeForKey(TKey key)
+        {
+            int hashCode = 0;
+            if (hasCustomComparer)
+            {
+                hashCode = comparer.GetHashCode(key);
+            }
+            else
+            {
+                hashCode = key.GetHashCode();
+            }
+
+            return hashCode;
+        }
+
+        private bool GetEqualityForKey(TKey key1, TKey key2)
+        {
+            bool equality = false;
+            if (hasCustomComparer)
+            {
+                equality = comparer.Equals(key1, key2);
+            }
+            else
+            {
+                equality = key1.Equals(key2);
+            }
+            return equality;
         }
     }
 }

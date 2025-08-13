@@ -68,9 +68,17 @@ mySimpleDictionaryString.Add("prvi", "First element");
 mySimpleDictionaryString.Add("drugi", "Second element");
 mySimpleDictionaryString.Add("treci", "Third element");
 mySimpleDictionaryString.Add("cetvrti", "Fourth element");
-mySimpleDictionaryString.Add("prvi", "Ponovljeni");
+//mySimpleDictionaryString.Add("prvi", "Ponovljeni");
 
 foreach (var item in mySimpleDictionaryString)
 {
     Console.WriteLine(item.Key + ": " + item.Value);
 }
+
+MySimpleDictionary<string, string> equalityDictionary = new MySimpleDictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+equalityDictionary.Add("prvi", "First element");
+equalityDictionary.Add("drugi", "Second element");
+equalityDictionary.Add("treci", "Third element");
+equalityDictionary.Add("cetvrti", "Fourth element");
+//equalityDictionary.Add("PRVI", "should throw an error");
+Console.WriteLine("puca ovdeee");
