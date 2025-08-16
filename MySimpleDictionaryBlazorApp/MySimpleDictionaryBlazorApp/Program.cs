@@ -57,6 +57,12 @@ foreach (var value in newValues)
 {
     Console.WriteLine(value);
 }
+
+MySimpleDictionary<int, string> newDict = new MySimpleDictionary<int, string>();
+for (int i = 0; i < 100; i++)
+{
+    newDict.Add(i, "nesto");
+}
 //provera u konzoli---------------------------------------------------------------
 var builder = WebApplication.CreateBuilder(args);
 

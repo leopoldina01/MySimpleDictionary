@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace MySimpleDictionaryBlazorApp.Model
 {
@@ -350,7 +351,18 @@ namespace MySimpleDictionaryBlazorApp.Model
             int hashCode;
             int bucketIndex;
             int reminder;
-            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+            //calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+            hashCode = GetHashCodeForKey(key);
+
+            reminder = hashCode % sizeOfBuckets;
+            if (reminder < 0)
+            {
+                bucketIndex = sizeOfBuckets + reminder;
+            }
+            else
+            {
+                bucketIndex = reminder;
+            }
 
             int next = -1;
             int pointerInBucket = 0;
@@ -360,20 +372,54 @@ namespace MySimpleDictionaryBlazorApp.Model
                 if (freeCount > 0 && freeList != -1)
                 {
                     buckets[bucketIndex] = freeList;
-                    RemoveFromFreeList();
+                    //RemoveFromFreeList();
+                    freeCount--;
+                    freeList = Math.Abs(entries[freeList].next) + startFreeList;
 
-                    UpdateSizeOfEntries();
+                    //UpdateSizeOfEntries();
+                    numberOfEntries++;
+
+                    totalNumberOfEntries = numberOfEntries + freeCount;
                 }
                 else
                 {
-                    UpdateSizeOfEntries();
+                    //UpdateSizeOfEntries();
+                    numberOfEntries++;
+
+                    totalNumberOfEntries = numberOfEntries + freeCount;
 
                     buckets[bucketIndex] = totalNumberOfEntries;
                 }
             }
             else
             {
-                bool alreadyInTheList = IsKeyAlreadyInTheList(key);
+                //bool alreadyInTheList = IsKeyAlreadyInTheList(key
+                bool alreadyInTheList = false;
+                int elementNext = buckets[bucketIndex] - 1;
+                while (elementNext != -1)
+                {
+                    if (hashCode == entries[elementNext].HashCode)
+                    {
+                        //bool equality = GetEqualityForKey(key, entries[elementNext].Key);
+                        bool equality = false;
+                        if (hasCustomComparer)
+                        {
+                            equality = comparer.Equals(key, entries[elementNext].Key);
+                        }
+                        else
+                        {
+                            equality = key.Equals(entries[elementNext].Key);
+                        }
+
+                        if (equality)
+                        {
+                            alreadyInTheList = true;
+                            break;
+                        }
+                    }
+                    elementNext = entries[elementNext].next;
+                }
+
                 if (alreadyInTheList)
                 {
                     throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
@@ -384,13 +430,21 @@ namespace MySimpleDictionaryBlazorApp.Model
                     next = buckets[bucketIndex] - 1;
                     buckets[bucketIndex] = freeList;
 
-                    RemoveFromFreeList();
+                    //RemoveFromFreeList();
+                    freeCount--;
+                    freeList = Math.Abs(entries[freeList].next) + startFreeList;
 
-                    UpdateSizeOfEntries();
+                    //UpdateSizeOfEntries();
+                    numberOfEntries++;
+
+                    totalNumberOfEntries = numberOfEntries + freeCount;
                 }
                 else
                 {
-                    UpdateSizeOfEntries();
+                    //UpdateSizeOfEntries();
+                    numberOfEntries++;
+
+                    totalNumberOfEntries = numberOfEntries + freeCount;
 
                     next = buckets[bucketIndex] - 1;
                     buckets[bucketIndex] = totalNumberOfEntries;
@@ -398,8 +452,14 @@ namespace MySimpleDictionaryBlazorApp.Model
             }
 
             int entriesIndex = buckets[bucketIndex] - 1;
-            AddEntry(hashCode, next, key, value, entriesIndex);
-            loadFactor = Math.Round((decimal)numberOfEntries / sizeOfBuckets, 2);
+            Entry entry;
+            entry.HashCode = hashCode;
+            entry.next = next;
+            entry.Key = key;
+            entry.Value = value;
+            entries[entriesIndex] = entry;
+            //AddEntry(hashCode, next, key, value, entriesIndex);
+            loadFactor = (decimal)numberOfEntries / sizeOfBuckets;
         }
 
         private void Resize()
@@ -448,13 +508,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             sizeOfBuckets = newSize;
         }
 
-        private void UpdateSizeOfEntries()
-        {
-            numberOfEntries++;
-
-            totalNumberOfEntries = numberOfEntries + freeCount;
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsKeyAlreadyInTheList(TKey key)
         {
             int hashCode;
@@ -477,23 +531,6 @@ namespace MySimpleDictionaryBlazorApp.Model
             }
 
             return false;
-        }
-
-        private void RemoveFromFreeList()
-        {
-            freeCount--;
-            freeList = Math.Abs(entries[freeList].next) + startFreeList;
-        }
-
-        //funkcija za dodavanje entrija
-        private void AddEntry(int hashCode, int next, TKey key, TValue value, int entriesIndex)
-        {
-            Entry entry;
-            entry.HashCode = hashCode;
-            entry.next = next;
-            entry.Key = key;
-            entry.Value = value;
-            entries[entriesIndex] = entry;
         }
 
         //jedna test funkcija za ispis elemenata cisto da vidimo kako radi dal se dodaju i brisu
@@ -641,6 +678,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             return -1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void calculateBucketIndex(TKey key, out int hashCode, out int bucketIndex, out int reminder)
         {
             hashCode = GetHashCodeForKey(key);
@@ -673,6 +711,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             return GetEnumerator();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetHashCodeForKey(TKey key)
         {
             int hashCode = 0;

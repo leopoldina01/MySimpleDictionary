@@ -18,6 +18,7 @@ namespace MySimpleDictionaryBlazorApp.Helper
         {
             dictionary.Clear();
             myDictionary.Clear();
+            dictionary.Add(1, "prvi element");
             myDictionary.Add(1, "prvi element");
         }
 
@@ -30,11 +31,27 @@ namespace MySimpleDictionaryBlazorApp.Helper
             myDictionary.Add(2, "drugi element");
         }
 
+        //dodavanje novog elementa u dictionary za poredjenje
+        [Benchmark]
+        public void AddNewElementDictionary()
+        {
+            //MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
+
+            dictionary.Add(2, "drugi element");
+        }
+
         //provera postojanja kljuca
         [Benchmark]
         public void ContainsKey()
         {
             myDictionary.ContainsKey(1);
+        }
+
+        //provera postojanja kljuca u dictionary za poredjenje
+        [Benchmark]
+        public void ContainsKeyDictionary()
+        {
+            dictionary.ContainsKey(1);
         }
 
         //provera postojanja vrednosti
@@ -44,11 +61,25 @@ namespace MySimpleDictionaryBlazorApp.Helper
             myDictionary.ContainsValue("prvi element");
         }
 
+        //provera postojanja vrednosti u dictionary za poredjenje
+        [Benchmark]
+        public void ContainsValueDictionary()
+        {
+            dictionary.ContainsValue("prvi element");
+        }
+
         //uklanjanje pojedinacnog elementa
         [Benchmark]
         public void RemoveValue()
         {
             myDictionary.Remove(1);
+        }
+
+        //uklanjanje pojedinacnog elementa u dictionary za poredjenje
+        [Benchmark]
+        public void RemoveValueDictionary()
+        {
+            dictionary.Remove(1);
         }
 
         //uklanjanje pojedinacnog elementa sa vracanjem vrednosti
@@ -59,6 +90,14 @@ namespace MySimpleDictionaryBlazorApp.Helper
             myDictionary.Remove(1, out value);
         }
 
+        //uklanjanje pojedinacnog elementa sa vracanjem vrednosti u dictionary za poredjenje
+        [Benchmark]
+        public void RemoveValueReturnValueDictionary()
+        {
+            string value;
+            dictionary.Remove(1, out value);
+        }
+
         //brisanje celog sadrzaja
         [Benchmark]
         public void Clear()
@@ -66,11 +105,29 @@ namespace MySimpleDictionaryBlazorApp.Helper
             myDictionary.Clear();
         }
 
+        //brisanje celog sadrzaja u dictionary za poredjenje
+        [Benchmark]
+        public void ClearDictionary()
+        {
+            dictionary.Clear();
+        }
+
         //iteriranje kroz recnik
         [Benchmark]
         public void Iterator()
         {
             foreach (var item in myDictionary)
+            {
+                int key = item.Key;
+                string value = item.Value;
+            }
+        }
+
+        //iteriranje kroz recnik za poredjenje
+        [Benchmark]
+        public void IteratorDictionary()
+        {
+            foreach (var item in dictionary)
             {
                 int key = item.Key;
                 string value = item.Value;
