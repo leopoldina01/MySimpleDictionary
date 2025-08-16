@@ -8,7 +8,19 @@ using MySimpleDictionaryBlazorApp.Model;
 BenchmarkRunner.Run<MySimpleDictionaryBenchmarkHelper>();
 
 //provera da li radi u konzoli----------------------------------------------------------------------
+MySimpleDictionary<string, string> equalityDictionary = new MySimpleDictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+equalityDictionary.Add("prvi", "First element");
+equalityDictionary.Add("drugi", "Second element");
+equalityDictionary.Add("treci", "Third element");
+equalityDictionary.Add("cetvrti", "Fourth element");
+//equalityDictionary.Add("PRVI", "should throw an error");
 
+List<string> values = equalityDictionary.Values;
+
+foreach (var key in values)
+{
+    Console.WriteLine(key);
+}
 //provera da li radi u konzoli----------------------------------------------------------------------
 
 var builder = WebApplication.CreateBuilder(args);
