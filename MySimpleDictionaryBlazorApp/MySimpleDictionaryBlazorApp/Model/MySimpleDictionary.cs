@@ -187,7 +187,7 @@ namespace MySimpleDictionaryBlazorApp.Model
                 throw new ArgumentNullException("Collection shouldn't be null.");
             }
 
-            sizeOfBuckets = 1;
+            sizeOfBuckets = 11;
             buckets = new int[sizeOfBuckets];
             entries = new Entry[sizeOfBuckets];
             freeList = -1;
@@ -273,7 +273,7 @@ namespace MySimpleDictionaryBlazorApp.Model
                 throw new ArgumentNullException("Collection shouldn't be null.");
             }
 
-            sizeOfBuckets = 1;
+            sizeOfBuckets = 11;
             buckets = new int[sizeOfBuckets];
             entries = new Entry[sizeOfBuckets];
             freeList = -1;

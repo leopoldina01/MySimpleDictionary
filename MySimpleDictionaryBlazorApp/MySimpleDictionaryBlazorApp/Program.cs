@@ -1,3 +1,5 @@
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 using MudBlazor;
 using MudBlazor.Services;

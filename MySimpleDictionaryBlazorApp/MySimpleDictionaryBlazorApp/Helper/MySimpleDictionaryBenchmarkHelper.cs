@@ -1,25 +1,33 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using MySimpleDictionaryBlazorApp.Model;
 
 namespace MySimpleDictionaryBlazorApp.Helper
 {
+    [MemoryDiagnoser]
+    [ShortRunJob]
     public class MySimpleDictionaryBenchmarkHelper
     {
         //konstruktor
-        private static MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
+        //rivate static MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
+        private MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
+        private Dictionary<int, string> dictionary = new Dictionary<int, string>();
+
+        [IterationSetup]
+        public void BeforeEach()
+        {
+            dictionary.Clear();
+            myDictionary.Clear();
+            myDictionary.Add(1, "prvi element");
+        }
 
         //dodavanje novog elementa
         [Benchmark]
         public void AddNewElement()
         {
             //MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
-            try
-            {
-                myDictionary.Add(1, "prvi element");
-            }
-            catch (Exception ex)
-            {
-            }
+            
+            myDictionary.Add(2, "drugi element");
         }
 
         //provera postojanja kljuca
@@ -66,6 +74,26 @@ namespace MySimpleDictionaryBlazorApp.Helper
             {
                 int key = item.Key;
                 string value = item.Value;
+            }
+        }
+
+        //Dodavanje 1000 Elemenata u moj dictionary
+        [Benchmark]
+        public void Add100ElementsMySimpleDictionary()
+        {
+            for (int i = 2; i < 102; i++)
+            {
+                myDictionary.Add(i, "element");
+            }
+        }
+
+        //Dodavanje 1000 Elemenata u dictionary za poredjenje
+        [Benchmark]
+        public void Add100ElementsDictionary()
+        {
+            for (int i = 2; i < 102; i++)
+            {
+                dictionary.Add(i, "element");
             }
         }
     }
