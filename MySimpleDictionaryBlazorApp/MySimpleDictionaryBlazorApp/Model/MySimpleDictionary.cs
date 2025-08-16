@@ -83,6 +83,44 @@ namespace MySimpleDictionaryBlazorApp.Model
         public int Count { get { return numberOfEntries; } }
         public int Capacity { get { return sizeOfBuckets; } }
         public IEqualityComparer<TKey> Comparer { get { return comparer; } }
+        //pristup elementu
+        public TValue this[TKey key]
+        {
+            get
+            {
+                if (key == null)
+                {
+                    throw new ArgumentNullException("Key shouldn't be null!");
+                }
+                bool isKeyInTheDictionary = IsKeyAlreadyInTheList(key);
+                if (isKeyInTheDictionary)
+                {
+                    int entryIndex = GetEntryByKey(key);
+                    return entries[entryIndex].Value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException("Key is not found.");
+                }
+            }
+            set
+            {
+                if (key == null)
+                {
+                    throw new ArgumentNullException("Key shouldn't be null!");
+                }
+                bool isKeyInTheDictionary = IsKeyAlreadyInTheList(key);
+                if (isKeyInTheDictionary)
+                {
+                    int entryIndex = GetEntryByKey(key);
+                    entries[entryIndex].Value = value;
+                }
+                else
+                {
+                    Add(key, value);
+                }
+            }
+        }
 
         public MySimpleDictionary()
         {
@@ -297,45 +335,6 @@ namespace MySimpleDictionaryBlazorApp.Model
             }
         }
 
-        //pristup elementu
-        public TValue this[TKey key]
-        {
-            get
-            {
-                if (key == null)
-                {
-                    throw new ArgumentNullException("Key shouldn't be null!");
-                }
-                bool isKeyInTheDictionary = IsKeyAlreadyInTheList(key);
-                if (isKeyInTheDictionary)
-                {
-                    int entryIndex = GetEntryByKey(key);
-                    return entries[entryIndex].Value;
-                }
-                else
-                {
-                    throw new KeyNotFoundException("Key is not found.");
-                }
-            }
-            set
-            {
-                if (key == null)
-                {
-                    throw new ArgumentNullException("Key shouldn't be null!");
-                }
-                bool isKeyInTheDictionary = IsKeyAlreadyInTheList(key);
-                if (isKeyInTheDictionary)
-                {
-                    int entryIndex = GetEntryByKey(key);
-                    entries[entryIndex].Value = value;
-                }
-                else
-                {
-                    Add(key, value);
-                }
-            }
-        }
-
         public void Add(TKey key, TValue value)
         {
             if (key == null)
@@ -348,19 +347,11 @@ namespace MySimpleDictionaryBlazorApp.Model
                 Resize();
             }
 
-            int hashCode = GetHashCodeForKey(key);
-
+            int hashCode;
             int bucketIndex;
-            int reminder = hashCode % sizeOfBuckets;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
-            
+            int reminder;
+            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+
             int next = -1;
             int pointerInBucket = 0;
 
@@ -466,17 +457,11 @@ namespace MySimpleDictionaryBlazorApp.Model
 
         private bool IsKeyAlreadyInTheList(TKey key)
         {
-            int hashCode = GetHashCodeForKey(key);
-            int reminder = hashCode % sizeOfBuckets;
+            int hashCode;
+            int reminder;
             int bucketIndex;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
+            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+
             int elementNext = buckets[bucketIndex] - 1;
             while (elementNext != -1)
             {
@@ -528,17 +513,6 @@ namespace MySimpleDictionaryBlazorApp.Model
         //provera da li postoji kljuc
         public bool ContainsKey(TKey key)
         {
-            int hashCode = GetHashCodeForKey(key);
-            int reminder = hashCode % sizeOfBuckets;
-            int bucketIndex;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
             bool containsKey = IsKeyAlreadyInTheList(key);
             return containsKey;
         }
@@ -569,17 +543,11 @@ namespace MySimpleDictionaryBlazorApp.Model
                 throw new ArgumentNullException("Key is null");
             }
 
-            int hashCode = GetHashCodeForKey(key);
-            int reminder = hashCode % sizeOfBuckets;
+            int hashCode;
+            int reminder;
             int bucketIndex;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
+            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+
             bool containsKey = IsKeyAlreadyInTheList(key);
 
             if (!containsKey)
@@ -655,17 +623,11 @@ namespace MySimpleDictionaryBlazorApp.Model
 
         private int GetEntryByKey(TKey key)
         {
-            int hashCode = GetHashCodeForKey(key);
-            int reminder = hashCode % sizeOfBuckets;
+            int hashCode;
+            int reminder;
             int bucketIndex;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
+            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+
             int next = buckets[bucketIndex] - 1;
             while (next != -1)
             {
@@ -677,6 +639,21 @@ namespace MySimpleDictionaryBlazorApp.Model
                 next = entries[next].next;
             }
             return -1;
+        }
+
+        private void calculateBucketIndex(TKey key, out int hashCode, out int bucketIndex, out int reminder)
+        {
+            hashCode = GetHashCodeForKey(key);
+
+            reminder = hashCode % sizeOfBuckets;
+            if (reminder < 0)
+            {
+                bucketIndex = sizeOfBuckets + reminder;
+            }
+            else
+            {
+                bucketIndex = reminder;
+            }
         }
 
         //iteriranje kroz dictionary
