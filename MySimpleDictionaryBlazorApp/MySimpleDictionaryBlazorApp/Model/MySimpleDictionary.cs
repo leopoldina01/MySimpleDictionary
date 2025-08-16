@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using MudBlazor;
 using MySimpleDictionaryBlazorApp.Helper;
 using System;
 using System.Collections;
@@ -722,6 +723,44 @@ namespace MySimpleDictionaryBlazorApp.Model
                 equality = key1.Equals(key2);
             }
             return equality;
+        }
+
+        //TryAdd
+        public bool TryAdd(TKey key, TValue value)
+        {
+            try
+            {
+                Add(key, value);
+                return true;
+            } 
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentNullException(ex.Message, ex);
+            }
+            catch (ArgumentException ex)
+            {
+                return false;
+            }
+        }
+
+        //TryGetValue
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            try
+            {
+                TValue getValue = this[key];
+                value = getValue;
+                return true;
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentNullException(ex.Message, ex);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                value = default;
+                return false;
+            }
         }
 
         //moja inicijalna implementacija

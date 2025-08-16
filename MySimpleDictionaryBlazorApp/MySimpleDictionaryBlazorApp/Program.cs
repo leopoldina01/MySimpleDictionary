@@ -13,7 +13,9 @@ equalityDictionary.Add("prvi", "First element");
 equalityDictionary.Add("drugi", "Second element");
 equalityDictionary.Add("treci", "Third element");
 equalityDictionary.Add("cetvrti", "Fourth element");
-//equalityDictionary.Add("PRVI", "should throw an error");
+//bool trying = equalityDictionary.TryAdd(null, "should throw an error");
+string tryGetValue;
+bool tryingValue = equalityDictionary.TryGetValue("prvi", out tryGetValue);
 
 List<string> values = equalityDictionary.Values.ToList();
 
