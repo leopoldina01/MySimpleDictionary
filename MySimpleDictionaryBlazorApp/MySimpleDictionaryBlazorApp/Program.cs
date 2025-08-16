@@ -15,14 +15,45 @@ equalityDictionary.Add("treci", "Third element");
 equalityDictionary.Add("cetvrti", "Fourth element");
 //equalityDictionary.Add("PRVI", "should throw an error");
 
-List<string> values = equalityDictionary.Values;
+List<string> values = equalityDictionary.Values.ToList();
 
 foreach (var key in values)
 {
     Console.WriteLine(key);
 }
-//provera da li radi u konzoli----------------------------------------------------------------------
 
+//provera KeyCollection
+var keys = equalityDictionary.Keys;
+var newValues = equalityDictionary.Values;
+//provera KeyCollection
+foreach (var key in keys)
+{
+    Console.WriteLine(key);
+}
+Console.WriteLine("values");
+foreach (var value in newValues)
+{
+    Console.WriteLine(value);
+}
+equalityDictionary.Add("peti", "Peti element");
+equalityDictionary.Remove("prvi");
+foreach (var key in keys)
+{
+    Console.WriteLine(key);
+}
+Console.WriteLine("values");
+foreach (var value in newValues)
+{
+    Console.WriteLine(value);
+}
+Console.WriteLine(equalityDictionary.Count);
+
+
+foreach (var value in newValues)
+{
+    Console.WriteLine(value);
+}
+//provera u konzoli---------------------------------------------------------------
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMudServices(config =>

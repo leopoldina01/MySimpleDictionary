@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using MySimpleDictionaryBlazorApp.Helper;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace MySimpleDictionaryBlazorApp.Model
@@ -27,22 +29,46 @@ namespace MySimpleDictionaryBlazorApp.Model
         private int totalNumberOfEntries; //ovde ide broj entrija koji nisu obrisani + broj entrija koji su obrisani (numberOfEntries + freeCount)
         private bool hasCustomComparer;
         private IEqualityComparer<TKey> comparer;
-        public List<TKey> Keys
-        {
-            get
-            {
-                return GetAllKeys();
-            }
-        } //lista svih kljuceva
-        public List<TValue> Values
-        {
-            get
-            {
-                return GetAllValues();
-            }
-        } //lista svih vrednosti
 
+        //moja inicijalna ideja implementacije
+        //private TKey keys;
+        //public IEnumerable<TKey> Keys { get { return GetAllKeysIterator(); } }
+        //private TValue values;
+        //public IEnumerable<TValue> Values { get { return GetAllValuesIterator(); } }
+
+        //poboljsanje po uzoru na .net implementaciju
+        private MyKeyCollection keys;
+        private MyValueCollection values;
         //properties
+        public MyKeyCollection Keys
+        { 
+            get
+            {
+                if (keys != null)
+                {
+                    return keys;
+                }
+                else
+                {
+                    return new MyKeyCollection(this);
+                }
+            }
+        }
+        public MyValueCollection Values
+        {
+            get
+            {
+                if (values != null)
+                {
+                    return values;
+                }
+                else
+                {
+                    return new MyValueCollection(this);
+                }
+            }
+        }
+        
         public int[] Buckets { get { return buckets; } }
         public Entry[] Entries { get { return entries; } }
         public int SizeOfBuckets { get { return sizeOfBuckets; } }
@@ -323,7 +349,6 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             int hashCode = GetHashCodeForKey(key);
 
-            Console.WriteLine("Hash Code " + hashCode);
             int bucketIndex;
             int reminder = hashCode % sizeOfBuckets;
             if (reminder < 0)
@@ -483,8 +508,6 @@ namespace MySimpleDictionaryBlazorApp.Model
             entry.Key = key;
             entry.Value = value;
             entries[entriesIndex] = entry;
-            Keys.Add(key);
-            Values.Add(value);
         }
 
         //jedna test funkcija za ispis elemenata cisto da vidimo kako radi dal se dodaju i brisu
@@ -601,8 +624,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             entries[current].next = startFreeList - freeList;
             freeCount++;
             freeList = current;
-            Keys.Remove(key);
-            Values.Remove(entries[current].Value);
+            numberOfEntries--;
         }
 
         public bool Remove(TKey key, out TValue value)
@@ -702,30 +724,160 @@ namespace MySimpleDictionaryBlazorApp.Model
             return equality;
         }
 
-        private List<TKey> GetAllKeys()
+        //moja inicijalna implementacija
+        //private IEnumerable<TKey> GetAllKeysIterator()
+        //{
+        //    for (int i = 0; i < totalNumberOfEntries; i++)
+        //    {
+        //        if (entries[i].next > -2)
+        //        {
+        //            yield return entries[i].Key;
+        //        }
+        //    }
+        //}
+
+        //private IEnumerable<TValue> GetAllValuesIterator()
+        //{
+        //    for (int i = 0; i < totalNumberOfEntries; i++)
+        //    {
+        //        if (entries[i].next > -2)
+        //        {
+        //            yield return entries[i].Value;
+        //        }
+        //    }
+        //}
+
+        //poboljsanje po uzoru na .net implementaciju
+        public sealed class MyKeyCollection : IEnumerable<TKey> 
         {
-            List<TKey> keys = new List<TKey>();
-            for (int i = 0; i < totalNumberOfEntries; i++)
+            private readonly MySimpleDictionary<TKey, TValue> _dictionary;
+            public MyKeyCollection(MySimpleDictionary<TKey, TValue> dictionary)
             {
-                if (entries[i].next > -2)
+                _dictionary = dictionary;
+            }
+
+            public MyEnumerator GetEnumerator() => new MyEnumerator(_dictionary);
+
+            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return ((IEnumerable<TKey>)this).GetEnumerator();
+            }
+
+            public struct MyEnumerator : IEnumerator<TKey>, IEnumerator
+            {
+                private readonly MySimpleDictionary<TKey, TValue> _mySimpleDictionary;
+                private TKey? _currentKey;
+                private int _index;
+
+                internal MyEnumerator(MySimpleDictionary<TKey, TValue> mySimpleDictionary)
                 {
-                    keys.Add(entries[i].Key);
+                    _mySimpleDictionary = mySimpleDictionary;
+                    _currentKey = default;
+                    _index = 0;
+                }
+                public TKey Current => _currentKey;
+
+                object IEnumerator.Current => Current;
+
+                public void Dispose()
+                {
+                }
+
+                public bool MoveNext()
+                {
+                    while ((uint)_index < (uint)_mySimpleDictionary.totalNumberOfEntries)
+                    {
+                        ref Entry entry = ref _mySimpleDictionary.entries![_index++];
+
+                        if (entry.next >= -1)
+                        {
+                            _currentKey = entry.Key;
+                            return true;
+                        }
+                    }
+
+                    _index = _mySimpleDictionary.totalNumberOfEntries + 1;
+                    _currentKey = default;
+                    return false;
+                }
+
+                public void Reset()
+                {
+                    _index = 0;
+                    _currentKey = default;
                 }
             }
-            return keys;
         }
 
-        private List<TValue> GetAllValues()
+        public sealed class MyValueCollection : IEnumerable<TValue>
         {
-            List<TValue> values = new List<TValue>();
-            for (int i = 0; i < totalNumberOfEntries; i++)
+            private readonly MySimpleDictionary<TKey, TValue> _dictionary;
+            public MyValueCollection(MySimpleDictionary<TKey, TValue> dictionary)
             {
-                if (entries[i].next > -2)
+                _dictionary = dictionary;
+            }
+
+            public MyEnumerator GetEnumerator() => new MyEnumerator(_dictionary);
+
+            IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return ((IEnumerable<TValue>)this).GetEnumerator();
+            }
+
+            public struct MyEnumerator : IEnumerator<TValue>, IEnumerator
+            {
+                private readonly MySimpleDictionary<TKey, TValue> _mySimpleDictionary;
+                private TValue? _currentValue;
+                private int _index;
+
+                internal MyEnumerator(MySimpleDictionary<TKey, TValue> mySimpleDictionary)
                 {
-                    values.Add(entries[i].Value);
+                    _mySimpleDictionary = mySimpleDictionary;
+                    _currentValue = default;
+                    _index = 0;
+                }
+                public TValue Current => _currentValue;
+
+                object IEnumerator.Current => Current;
+
+                public void Dispose()
+                {
+                }
+
+                public bool MoveNext()
+                {
+                    while ((uint)_index < (uint)_mySimpleDictionary.totalNumberOfEntries)
+                    {
+                        ref Entry entry = ref _mySimpleDictionary.entries![_index++];
+
+                        if (entry.next >= -1)
+                        {
+                            _currentValue = entry.Value;
+                            return true;
+                        }
+                    }
+
+                    _index = _mySimpleDictionary.totalNumberOfEntries + 1;
+                    _currentValue = default;
+                    return false;
+                }
+
+                public void Reset()
+                {
+                    _index = 0;
+                    _currentValue = default;
                 }
             }
-            return values;
         }
     }
 }
