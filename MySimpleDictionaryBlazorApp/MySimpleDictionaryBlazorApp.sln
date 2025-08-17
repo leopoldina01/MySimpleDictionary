@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36221.1 d17.14
+VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySimpleDictionaryBlazorApp", "MySimpleDictionaryBlazorApp\MySimpleDictionaryBlazorApp.csproj", "{AED7AA74-F412-47A6-BBC0-5DB9346B8355}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MysimpleDictionaryBlazorApp.Tests", "MysimpleDictionaryBlazorApp.Tests\MysimpleDictionaryBlazorApp.Tests.csproj", "{E1E12238-9D44-48BF-BDE2-150CD82CF7E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{AED7AA74-F412-47A6-BBC0-5DB9346B8355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AED7AA74-F412-47A6-BBC0-5DB9346B8355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AED7AA74-F412-47A6-BBC0-5DB9346B8355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1E12238-9D44-48BF-BDE2-150CD82CF7E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1E12238-9D44-48BF-BDE2-150CD82CF7E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1E12238-9D44-48BF-BDE2-150CD82CF7E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1E12238-9D44-48BF-BDE2-150CD82CF7E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
