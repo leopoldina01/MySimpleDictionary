@@ -348,21 +348,10 @@ namespace MySimpleDictionaryBlazorApp.Model
                 Resize();
             }
 
-            int hashCode;
-            int bucketIndex;
-            int reminder;
+            int hashCode = comparer.GetHashCode(key);
+            uint bucketIndex = (uint)hashCode % (uint)sizeOfBuckets;
             //calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
-            hashCode = GetHashCodeForKey(key);
-
-            reminder = hashCode % sizeOfBuckets;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
+            //hashCode = GetHashCodeForKey(key);
 
             int next = -1;
             int pointerInBucket = 0;
@@ -394,35 +383,31 @@ namespace MySimpleDictionaryBlazorApp.Model
             else
             {
                 //bool alreadyInTheList = IsKeyAlreadyInTheList(key
-                bool alreadyInTheList = false;
+                //bool alreadyInTheList = false;
                 int elementNext = buckets[bucketIndex] - 1;
                 while (elementNext != -1)
                 {
                     if (hashCode == entries[elementNext].HashCode)
                     {
                         //bool equality = GetEqualityForKey(key, entries[elementNext].Key);
-                        bool equality = false;
-                        if (hasCustomComparer)
-                        {
-                            equality = comparer.Equals(key, entries[elementNext].Key);
-                        }
-                        else
-                        {
-                            equality = key.Equals(entries[elementNext].Key);
-                        }
+                        //bool equality = false;
+                        //if (hasCustomComparer)
+                        //{
+                        //    equality = comparer.Equals(key, entries[elementNext].Key);
+                        //}
+                        //else
+                        //{
+                        //    equality = key.Equals(entries[elementNext].Key);
+                        //}
+
+                        bool equality = comparer.Equals(key, entries[elementNext].Key);
 
                         if (equality)
                         {
-                            alreadyInTheList = true;
-                            break;
+                            throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
                         }
                     }
                     elementNext = entries[elementNext].next;
-                }
-
-                if (alreadyInTheList)
-                {
-                    throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
                 }
 
                 if (freeCount > 0 && freeList != -1)

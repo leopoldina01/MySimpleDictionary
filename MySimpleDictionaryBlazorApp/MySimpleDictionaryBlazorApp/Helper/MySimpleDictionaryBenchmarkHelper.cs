@@ -11,7 +11,7 @@ namespace MySimpleDictionaryBlazorApp.Helper
         //konstruktor
         //rivate static MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
         private MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
-        private Dictionary<int, string> dictionary = new Dictionary<int, string>();
+        private Dictionary<int, string> dictionary = new Dictionary<int, string>(11);
 
         [IterationSetup]
         public void BeforeEach()
