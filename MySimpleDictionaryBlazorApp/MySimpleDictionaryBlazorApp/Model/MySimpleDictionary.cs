@@ -539,58 +539,26 @@ namespace MySimpleDictionaryBlazorApp.Model
             {
                 throw new ArgumentNullException("Key is null");
             }
-            //bool containsKey = IsKeyAlreadyInTheList(key);
-            bool containsKey = false;
-            int hashCode;
-            int reminder;
-            int bucketIndex;
-            //calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
-            //hashCode = GetHashCodeForKey(key);
-            if (hasCustomComparer)
-            {
-                hashCode = comparer.GetHashCode(key);
-            }
-            else
-            {
-                hashCode = key.GetHashCode();
-            }
 
-            reminder = hashCode % sizeOfBuckets;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
+            int hashCode = comparer.GetHashCode(key);
+            uint bucketIndex = (uint)hashCode % (uint)sizeOfBuckets;
 
             int elementNext = buckets[bucketIndex] - 1;
             while (elementNext != -1)
             {
                 if (hashCode == entries[elementNext].HashCode)
                 {
-                    //bool equality = GetEqualityForKey(key, entries[elementNext].Key);
-                    bool equality;
-                    if (hasCustomComparer)
-                    {
-                        equality = comparer.Equals(key, entries[elementNext].Key);
-                    }
-                    else
-                    {
-                        equality = key.Equals(entries[elementNext].Key);
-                    }
+                    bool equality = comparer.Equals(key, entries[elementNext].Key);
 
                     if (equality)
                     {
-                        containsKey = true;
                         return true;
                     }
                 }
                 elementNext = entries[elementNext].next;
             }
 
-            return containsKey;
+            return false;
         }
 
         //provera da li postoji vrednost
