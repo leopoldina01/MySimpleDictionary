@@ -350,8 +350,6 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             int hashCode = comparer.GetHashCode(key);
             uint bucketIndex = (uint)hashCode % (uint)sizeOfBuckets;
-            //calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
-            //hashCode = GetHashCodeForKey(key);
 
             int next = -1;
             int pointerInBucket = 0;
@@ -361,18 +359,15 @@ namespace MySimpleDictionaryBlazorApp.Model
                 if (freeCount > 0 && freeList != -1)
                 {
                     buckets[bucketIndex] = freeList + 1;
-                    //RemoveFromFreeList();
                     freeCount--;
                     freeList = Math.Abs(entries[freeList].next) + startFreeList;
 
-                    //UpdateSizeOfEntries();
                     numberOfEntries++;
 
                     totalNumberOfEntries = numberOfEntries + freeCount;
                 }
                 else
                 {
-                    //UpdateSizeOfEntries();
                     numberOfEntries++;
 
                     totalNumberOfEntries = numberOfEntries + freeCount;
@@ -382,24 +377,11 @@ namespace MySimpleDictionaryBlazorApp.Model
             }
             else
             {
-                //bool alreadyInTheList = IsKeyAlreadyInTheList(key
-                //bool alreadyInTheList = false;
                 int elementNext = buckets[bucketIndex] - 1;
                 while (elementNext != -1)
                 {
                     if (hashCode == entries[elementNext].HashCode)
                     {
-                        //bool equality = GetEqualityForKey(key, entries[elementNext].Key);
-                        //bool equality = false;
-                        //if (hasCustomComparer)
-                        //{
-                        //    equality = comparer.Equals(key, entries[elementNext].Key);
-                        //}
-                        //else
-                        //{
-                        //    equality = key.Equals(entries[elementNext].Key);
-                        //}
-
                         bool equality = comparer.Equals(key, entries[elementNext].Key);
 
                         if (equality)
@@ -415,18 +397,15 @@ namespace MySimpleDictionaryBlazorApp.Model
                     next = buckets[bucketIndex] - 1;
                     buckets[bucketIndex] = freeList + 1;
 
-                    //RemoveFromFreeList();
                     freeCount--;
                     freeList = Math.Abs(entries[freeList].next) + startFreeList;
 
-                    //UpdateSizeOfEntries();
                     numberOfEntries++;
 
                     totalNumberOfEntries = numberOfEntries + freeCount;
                 }
                 else
                 {
-                    //UpdateSizeOfEntries();
                     numberOfEntries++;
 
                     totalNumberOfEntries = numberOfEntries + freeCount;
@@ -443,7 +422,6 @@ namespace MySimpleDictionaryBlazorApp.Model
             entry.Key = key;
             entry.Value = value;
             entries[entriesIndex] = entry;
-            //AddEntry(hashCode, next, key, value, entriesIndex);
             loadFactor = (decimal)numberOfEntries / sizeOfBuckets;
         }
 
@@ -496,17 +474,16 @@ namespace MySimpleDictionaryBlazorApp.Model
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsKeyAlreadyInTheList(TKey key)
         {
-            int hashCode;
-            int reminder;
-            int bucketIndex;
-            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+            int hashCode = comparer.GetHashCode(key);
+            uint bucketIndex = (uint)hashCode % (uint)sizeOfBuckets;
 
             int elementNext = buckets[bucketIndex] - 1;
             while (elementNext != -1)
             {
                 if (hashCode == entries[elementNext].HashCode)
                 {
-                    bool equality = GetEqualityForKey(key, entries[elementNext].Key);
+                    bool equality = comparer.Equals(key, entries[elementNext].Key);
+
                     if (equality)
                     {
                         return true;
@@ -516,20 +493,6 @@ namespace MySimpleDictionaryBlazorApp.Model
             }
 
             return false;
-        }
-
-        //jedna test funkcija za ispis elemenata cisto da vidimo kako radi dal se dodaju i brisu
-        public void WriteAllElementsFromDictionary()
-        {
-            for (int i = 0; i < numberOfEntries; i++)
-            {
-                if (entries[i].next < -1)
-                {
-                    continue;
-                }
-
-                //Console.WriteLine("Key: " + entries[i].Key + " Value: " + entries[i].Value);
-            }
         }
 
         //provera da li postoji kljuc
@@ -601,7 +564,6 @@ namespace MySimpleDictionaryBlazorApp.Model
 
                 if (equality)
                 {
-                    //RemoveEntry(bucketIndex, current, key);
                     buckets[bucketIndex] = entries[current].next + 1;
                     entries[current].next = startFreeList - freeList;
                     freeCount++;
@@ -619,7 +581,6 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             while (current != -1)
             {
-                //bool equalityCurrent = GetEqualityForKey(entries[current].Key, key);
                 
                 if (entries[current].HashCode == hashCode)
                 {
@@ -627,7 +588,6 @@ namespace MySimpleDictionaryBlazorApp.Model
 
                     if (equalityCurrent)
                     {
-                        //RemoveEntry(bucketIndex, current, key);
                         buckets[bucketIndex] = entries[current].next + 1;
                         entries[current].next = startFreeList - freeList;
                         freeCount++;
@@ -641,15 +601,6 @@ namespace MySimpleDictionaryBlazorApp.Model
             }
 
             return false;
-        }
-
-        private void RemoveEntry(int bucketIndex, int current, TKey key)
-        {
-            buckets[bucketIndex] = entries[current].next + 1;
-            entries[current].next = startFreeList - freeList;
-            freeCount++;
-            freeList = current;
-            numberOfEntries--;
         }
 
         public bool Remove(TKey key, out TValue value)
@@ -679,38 +630,24 @@ namespace MySimpleDictionaryBlazorApp.Model
 
         private int GetEntryByKey(TKey key)
         {
-            int hashCode;
-            int reminder;
-            int bucketIndex;
-            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+            int hashCode = comparer.GetHashCode(key);
+            uint bucketIndex = (uint)hashCode % (uint)sizeOfBuckets;
 
             int next = buckets[bucketIndex] - 1;
             while (next != -1)
             {
-                bool equality = GetEqualityForKey(entries[next].Key, key);
-                if (entries[next].HashCode == hashCode && equality)
+
+                if (entries[next].HashCode == hashCode)
                 {
-                    return next;
+                    bool equality = comparer.Equals(entries[next].Key, key);
+                    if (equality)
+                    {
+                        return next;
+                    }
                 }
                 next = entries[next].next;
             }
             return -1;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void calculateBucketIndex(TKey key, out int hashCode, out int bucketIndex, out int reminder)
-        {
-            hashCode = GetHashCodeForKey(key);
-
-            reminder = hashCode % sizeOfBuckets;
-            if (reminder < 0)
-            {
-                bucketIndex = sizeOfBuckets + reminder;
-            }
-            else
-            {
-                bucketIndex = reminder;
-            }
         }
 
         //iteriranje kroz dictionary
@@ -728,36 +665,6 @@ namespace MySimpleDictionaryBlazorApp.Model
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetHashCodeForKey(TKey key)
-        {
-            int hashCode = 0;
-            if (hasCustomComparer)
-            {
-                hashCode = comparer.GetHashCode(key);
-            }
-            else
-            {
-                hashCode = key.GetHashCode();
-            }
-
-            return hashCode;
-        }
-
-        private bool GetEqualityForKey(TKey key1, TKey key2)
-        {
-            bool equality = false;
-            if (hasCustomComparer)
-            {
-                equality = comparer.Equals(key1, key2);
-            }
-            else
-            {
-                equality = key1.Equals(key2);
-            }
-            return equality;
         }
 
         //TryAdd
