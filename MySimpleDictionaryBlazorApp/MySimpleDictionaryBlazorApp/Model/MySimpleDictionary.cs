@@ -371,7 +371,7 @@ namespace MySimpleDictionaryBlazorApp.Model
             {
                 if (freeCount > 0 && freeList != -1)
                 {
-                    buckets[bucketIndex] = freeList;
+                    buckets[bucketIndex] = freeList + 1;
                     //RemoveFromFreeList();
                     freeCount--;
                     freeList = Math.Abs(entries[freeList].next) + startFreeList;
@@ -428,7 +428,7 @@ namespace MySimpleDictionaryBlazorApp.Model
                 if (freeCount > 0 && freeList != -1)
                 {
                     next = buckets[bucketIndex] - 1;
-                    buckets[bucketIndex] = freeList;
+                    buckets[bucketIndex] = freeList + 1;
 
                     //RemoveFromFreeList();
                     freeCount--;
@@ -637,24 +637,88 @@ namespace MySimpleDictionaryBlazorApp.Model
             int hashCode;
             int reminder;
             int bucketIndex;
-            calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
-
-            bool containsKey = IsKeyAlreadyInTheList(key);
-
-            if (!containsKey)
+            //calculateBucketIndex(key, out hashCode, out bucketIndex, out reminder);
+            //hashCode = GetHashCodeForKey(key);
+            if (hasCustomComparer)
             {
-                return false;
+                hashCode = comparer.GetHashCode(key);
+            }
+            else
+            {
+                hashCode = key.GetHashCode();
             }
 
+            reminder = hashCode % sizeOfBuckets;
+            if (reminder < 0)
+            {
+                bucketIndex = sizeOfBuckets + reminder;
+            }
+            else
+            {
+                bucketIndex = reminder;
+            }
+
+            //bool containsKey = IsKeyAlreadyInTheList(key);
+            //bool containsKey = false;
+            //int elementNext = buckets[bucketIndex] - 1;
+            //while (elementNext != -1)
+            //{
+            //    if (hashCode == entries[elementNext].HashCode)
+            //    {
+            //        //bool equality = GetEqualityForKey(key, entries[elementNext].Key);
+            //        bool equalityLocal = false;
+            //        if (hasCustomComparer)
+            //        {
+            //            equalityLocal = comparer.Equals(key, entries[elementNext].Key);
+            //        }
+            //        else
+            //        {
+            //            equalityLocal = key.Equals(entries[elementNext].Key);
+            //        }
+            //        if (equalityLocal)
+            //        {
+            //            containsKey = true;
+            //        }
+            //    }
+            //    elementNext = entries[elementNext].next;
+            //}
+
+            //containsKey = false;
+
+            //if (!containsKey)
+            //{
+            //    return false;
+            //}
+
+            bool foundKeyAndRemoved = false;
             int current = buckets[bucketIndex] - 1;
             int before = -1;
 
-            bool equality = GetEqualityForKey(entries[current].Key, key);
+            
             //prvo proverimo prvi element on ako nije bice pokazivac na before, ako jeste samo ce buckets[bucketIndex] = entries[next].next
-            if (entries[current].HashCode == hashCode && equality)
+            if (entries[current].HashCode == hashCode)
             {
-                RemoveEntry(bucketIndex, current, key);
-                return true;
+                //bool equality = GetEqualityForKey(entries[current].Key, key);
+                bool equality = false;
+                if (hasCustomComparer)
+                {
+                    equality = comparer.Equals(entries[current].Key, key);
+                }
+                else
+                {
+                    equality = entries[current].Key.Equals(key);
+                }
+                if (equality)
+                {
+                    //RemoveEntry(bucketIndex, current, key);
+                    buckets[bucketIndex] = entries[current].next + 1;
+                    entries[current].next = startFreeList - freeList;
+                    freeCount++;
+                    freeList = current;
+                    numberOfEntries--;
+                    foundKeyAndRemoved = true;
+                    return true;
+                }
             }
             else
             {
@@ -665,17 +729,36 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             while (current != -1)
             {
-                bool equalityCurrent = GetEqualityForKey(entries[current].Key, key);
-                if (entries[current].HashCode == hashCode && equalityCurrent)
+                //bool equalityCurrent = GetEqualityForKey(entries[current].Key, key);
+                
+                if (entries[current].HashCode == hashCode)
                 {
-                    RemoveEntry(bucketIndex, current, key);
-                    break;
+                    bool equalityCurrent = false;
+                    if (hasCustomComparer)
+                    {
+                        equalityCurrent = comparer.Equals(entries[current].Key, key);
+                    }
+                    else
+                    {
+                        equalityCurrent = entries[current].Key.Equals(key);
+                    }
+                    if (equalityCurrent)
+                    {
+                        //RemoveEntry(bucketIndex, current, key);
+                        buckets[bucketIndex] = entries[current].next + 1;
+                        entries[current].next = startFreeList - freeList;
+                        freeCount++;
+                        freeList = current;
+                        numberOfEntries--;
+                        foundKeyAndRemoved = true;
+                        break;
+                    }
                 }
                 before = current;
                 current = entries[current].next;
             }
 
-            return true;
+            return foundKeyAndRemoved;
         }
 
         private void RemoveEntry(int bucketIndex, int current, TKey key)

@@ -10,59 +10,59 @@ using MySimpleDictionaryBlazorApp.Model;
 BenchmarkRunner.Run<MySimpleDictionaryBenchmarkHelper>();
 
 //provera da li radi u konzoli----------------------------------------------------------------------
-MySimpleDictionary<string, string> equalityDictionary = new MySimpleDictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-equalityDictionary.Add("prvi", "First element");
-equalityDictionary.Add("drugi", "Second element");
-equalityDictionary.Add("treci", "Third element");
-equalityDictionary.Add("cetvrti", "Fourth element");
-//bool trying = equalityDictionary.TryAdd(null, "should throw an error");
-string tryGetValue;
-bool tryingValue = equalityDictionary.TryGetValue("prvi", out tryGetValue);
+//MySimpleDictionary<string, string> equalityDictionary = new MySimpleDictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+//equalityDictionary.Add("prvi", "First element");
+//equalityDictionary.Add("drugi", "Second element");
+//equalityDictionary.Add("treci", "Third element");
+//equalityDictionary.Add("cetvrti", "Fourth element");
+////bool trying = equalityDictionary.TryAdd(null, "should throw an error");
+//string tryGetValue;
+//bool tryingValue = equalityDictionary.TryGetValue("prvi", out tryGetValue);
 
-List<string> values = equalityDictionary.Values.ToList();
+//List<string> values = equalityDictionary.Values.ToList();
 
-foreach (var key in values)
-{
-    Console.WriteLine(key);
-}
+//foreach (var key in values)
+//{
+//    Console.WriteLine(key);
+//}
 
-//provera KeyCollection
-var keys = equalityDictionary.Keys;
-var newValues = equalityDictionary.Values;
-//provera KeyCollection
-foreach (var key in keys)
-{
-    Console.WriteLine(key);
-}
-Console.WriteLine("values");
-foreach (var value in newValues)
-{
-    Console.WriteLine(value);
-}
-equalityDictionary.Add("peti", "Peti element");
-equalityDictionary.Remove("prvi");
-foreach (var key in keys)
-{
-    Console.WriteLine(key);
-}
-Console.WriteLine("values");
-foreach (var value in newValues)
-{
-    Console.WriteLine(value);
-}
-Console.WriteLine(equalityDictionary.Count);
+////provera KeyCollection
+//var keys = equalityDictionary.Keys;
+//var newValues = equalityDictionary.Values;
+////provera KeyCollection
+//foreach (var key in keys)
+//{
+//    Console.WriteLine(key);
+//}
+//Console.WriteLine("values");
+//foreach (var value in newValues)
+//{
+//    Console.WriteLine(value);
+//}
+//equalityDictionary.Add("peti", "Peti element");
+//equalityDictionary.Remove("prvi");
+//foreach (var key in keys)
+//{
+//    Console.WriteLine(key);
+//}
+//Console.WriteLine("values");
+//foreach (var value in newValues)
+//{
+//    Console.WriteLine(value);
+//}
+//Console.WriteLine(equalityDictionary.Count);
 
 
-foreach (var value in newValues)
-{
-    Console.WriteLine(value);
-}
+//foreach (var value in newValues)
+//{
+//    Console.WriteLine(value);
+//}
 
-MySimpleDictionary<int, string> newDict = new MySimpleDictionary<int, string>();
-for (int i = 0; i < 100; i++)
-{
-    newDict.Add(i, "nesto");
-}
+//MySimpleDictionary<int, string> newDict = new MySimpleDictionary<int, string>();
+//for (int i = 0; i < 100; i++)
+//{
+//    newDict.Add(i, "nesto");
+//}
 //provera u konzoli---------------------------------------------------------------
 var builder = WebApplication.CreateBuilder(args);
 

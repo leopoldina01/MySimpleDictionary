@@ -73,7 +73,6 @@
         {
             Snackbar.Add("Error while removin item", Severity.Error);
         }
-        dictionaryToShow.Remove(key);
     }
 
     private void Clear()
@@ -100,7 +99,8 @@
         {
             if (form.IsValid)
             {
-                dictionaryToShow[newKey] = newValue;
+                dictionaryToShow.Add(newKey, newValue);
+                //dictionaryToShow[newKey] = newValue;
                 Snackbar.Add("Item added successfully", Severity.Success);
                 addItemClicked = false;
             }
