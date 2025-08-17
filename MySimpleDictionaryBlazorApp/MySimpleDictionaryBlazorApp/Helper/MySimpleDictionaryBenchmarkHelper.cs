@@ -9,7 +9,6 @@ namespace MySimpleDictionaryBlazorApp.Helper
     public class MySimpleDictionaryBenchmarkHelper
     {
         //konstruktor
-        //rivate static MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
         private MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
         private Dictionary<int, string> dictionary = new Dictionary<int, string>(11);
 
@@ -25,9 +24,7 @@ namespace MySimpleDictionaryBlazorApp.Helper
         //dodavanje novog elementa
         [Benchmark]
         public void AddNewElement()
-        {
-            //MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
-            
+        {            
             myDictionary.Add(2, "drugi element");
         }
 
@@ -35,8 +32,6 @@ namespace MySimpleDictionaryBlazorApp.Helper
         [Benchmark]
         public void AddNewElementDictionary()
         {
-            //MySimpleDictionary<int, string> myDictionary = new MySimpleDictionary<int, string>();
-
             dictionary.Add(2, "drugi element");
         }
 

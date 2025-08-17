@@ -23,10 +23,10 @@ namespace MySimpleDictionaryBlazorApp.Model
         private Entry[] entries;
         private int sizeOfBuckets; //ovo ce trebati ali ce se koristiti i kao sizeOfEntries jer su im iste dimenzije
         private int numberOfEntries;
-        private int freeList; //sadrzi indeks prvog elementa u free listi
-        private int freeCount; //sadrzi broj elemenata koji su prazni
-        private decimal loadFactor; //load Factor na osnovu kojeg ce se resizovati dictionary
-        private decimal maxLoadFactor; //gornja granica load factora kada se predje resizuje se recnik (povecava)
+        private int freeList; 
+        private int freeCount; 
+        private decimal loadFactor; 
+        private decimal maxLoadFactor; 
         private int startFreeList; //pocetna vrednost za free list koja se koristi za racunanje pozicije sledeceg elementa u sledecoj listi
         private int totalNumberOfEntries; //ovde ide broj entrija koji nisu obrisani + broj entrija koji su obrisani (numberOfEntries + freeCount)
         private bool hasCustomComparer;
