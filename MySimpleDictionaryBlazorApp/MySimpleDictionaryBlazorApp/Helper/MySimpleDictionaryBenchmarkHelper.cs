@@ -5,7 +5,7 @@ using MySimpleDictionaryBlazorApp.Model;
 namespace MySimpleDictionaryBlazorApp.Helper
 {
     [MemoryDiagnoser]
-    [ShortRunJob]
+    //[ShortRunJob]
     public class MySimpleDictionaryBenchmarkHelper
     {
         //konstruktor

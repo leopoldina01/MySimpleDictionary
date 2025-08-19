@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.Xml;
 
 namespace MySimpleDictionaryBlazorApp.Model
 {
@@ -343,7 +344,7 @@ namespace MySimpleDictionaryBlazorApp.Model
                 throw new ArgumentNullException("Key shouldn't be null");
             }
 
-            if ((loadFactor >= maxLoadFactor && freeCount == 0) || sizeOfBuckets == 0)
+            if (sizeOfBuckets == 0 || (freeCount == 0 && loadFactor >= maxLoadFactor))
             {
                 Resize();
             }
@@ -352,76 +353,53 @@ namespace MySimpleDictionaryBlazorApp.Model
             uint bucketIndex = (uint)hashCode % (uint)sizeOfBuckets;
 
             int next = -1;
-            int pointerInBucket = 0;
 
-            if (buckets[bucketIndex] == 0)
+            int elementNext = buckets[bucketIndex] - 1;
+            while (elementNext != -1)
             {
-                if (freeCount > 0 && freeList != -1)
+                Entry entryElementNext = entries[elementNext];
+                if (hashCode == entryElementNext.HashCode && comparer.Equals(key, entryElementNext.Key))
                 {
-                    buckets[bucketIndex] = freeList + 1;
-                    freeCount--;
-                    freeList = Math.Abs(entries[freeList].next) + startFreeList;
+                    //bool equality = comparer.Equals(key, entries[elementNext].Key);
 
-                    numberOfEntries++;
-
-                    totalNumberOfEntries = numberOfEntries + freeCount;
+                    //if (equality)
+                    //{
+                    //    throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
+                    //}
+                    throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
                 }
-                else
-                {
-                    numberOfEntries++;
+                elementNext = entryElementNext.next;
+            }
 
-                    totalNumberOfEntries = numberOfEntries + freeCount;
+            int resizedEntryIndex = -1;
+            if (freeCount > 0 && freeList != -1)
+            {
+                next = buckets[bucketIndex] - 1;
+                buckets[bucketIndex] = freeList + 1;
+                resizedEntryIndex = freeList;
 
-                    buckets[bucketIndex] = totalNumberOfEntries;
-                }
+                freeCount--;
+                freeList = -1 * entries[freeList].next + startFreeList;
+
+                numberOfEntries++;
             }
             else
             {
-                int elementNext = buckets[bucketIndex] - 1;
-                while (elementNext != -1)
-                {
-                    if (hashCode == entries[elementNext].HashCode)
-                    {
-                        bool equality = comparer.Equals(key, entries[elementNext].Key);
+                numberOfEntries++;
 
-                        if (equality)
-                        {
-                            throw new ArgumentException("Argument with this key: " + key.ToString() + ", already exists in the dictionary");
-                        }
-                    }
-                    elementNext = entries[elementNext].next;
-                }
+                totalNumberOfEntries++;
 
-                if (freeCount > 0 && freeList != -1)
-                {
-                    next = buckets[bucketIndex] - 1;
-                    buckets[bucketIndex] = freeList + 1;
-
-                    freeCount--;
-                    freeList = Math.Abs(entries[freeList].next) + startFreeList;
-
-                    numberOfEntries++;
-
-                    totalNumberOfEntries = numberOfEntries + freeCount;
-                }
-                else
-                {
-                    numberOfEntries++;
-
-                    totalNumberOfEntries = numberOfEntries + freeCount;
-
-                    next = buckets[bucketIndex] - 1;
-                    buckets[bucketIndex] = totalNumberOfEntries;
-                }
+                next = buckets[bucketIndex] - 1;
+                buckets[bucketIndex] = totalNumberOfEntries;
+                resizedEntryIndex = totalNumberOfEntries - 1;
             }
 
-            int entriesIndex = buckets[bucketIndex] - 1;
             Entry entry;
             entry.HashCode = hashCode;
             entry.next = next;
             entry.Key = key;
             entry.Value = value;
-            entries[entriesIndex] = entry;
+            entries[resizedEntryIndex] = entry;
             loadFactor = (decimal)numberOfEntries / sizeOfBuckets;
         }
 
@@ -431,42 +409,31 @@ namespace MySimpleDictionaryBlazorApp.Model
             newSize = PrimeNumbersHelper.GetFirstNextPrime(newSize);
             int[] resizedBuckets = new int[newSize];
             Entry[] resizedEntries = new Entry[newSize];
-            int resizedNumberOfEntries = 0;
-            int resizedNext = -1;
 
-            foreach (var entry in entries)
+            for (int i = 0; i < totalNumberOfEntries; i++)
             {
-                int hashCode = entry.HashCode;
-                int resizedBucketIndex = hashCode % newSize;
-                if (resizedBuckets[resizedBucketIndex] == 0)
+                
+                if (entries[i].next > -2)
                 {
-                    resizedNumberOfEntries++;
-                    resizedBuckets[resizedBucketIndex] = resizedNumberOfEntries;
+                    Entry entry = entries[i];
+                    //uint resizedBucketIndex = (uint)entry.HashCode % (uint)newSize;
+                    //resizedEntries[i] = entry;
+                    //resizedEntries[i].next = resizedBuckets[resizedBucketIndex] - 1;
+                    //resizedBuckets[resizedBucketIndex] = i + 1;
+
+                    uint resizedBucketIndex = (uint)entry.HashCode % (uint)newSize;
+                    entry.next = resizedBuckets[resizedBucketIndex] - 1;
+                    resizedEntries[i] = entry;
+                    resizedBuckets[resizedBucketIndex] = i + 1;
                 }
                 else
                 {
-                    resizedNext = resizedBuckets[resizedBucketIndex] - 1;
-                    resizedNumberOfEntries++;
-                    resizedBuckets[resizedBucketIndex] = resizedNumberOfEntries;
+                    resizedEntries[i] = entries[i];
                 }
-                int resizedIndex = resizedNumberOfEntries - 1;
-
-                Entry resizedEntry;
-                resizedEntry.HashCode = entry.HashCode;
-                resizedEntry.next = resizedNext;
-                resizedEntry.Key = entry.Key;
-                resizedEntry.Value = entry.Value;
-                resizedEntries[resizedIndex] = resizedEntry;
             }
 
-            buckets = new int[newSize];
-            entries = new Entry[newSize];
-
-            for (int i = 0; i < newSize; i++)
-            {
-                buckets[i] = resizedBuckets[i];
-                entries[i] = resizedEntries[i];
-            }
+            buckets = resizedBuckets;
+            entries = resizedEntries;
 
             sizeOfBuckets = newSize;
         }
@@ -509,16 +476,19 @@ namespace MySimpleDictionaryBlazorApp.Model
             int elementNext = buckets[bucketIndex] - 1;
             while (elementNext != -1)
             {
-                if (hashCode == entries[elementNext].HashCode)
+                Entry entry = entries[elementNext];
+                if (hashCode == entry.HashCode && comparer.Equals(key, entry.Key))
                 {
-                    bool equality = comparer.Equals(key, entries[elementNext].Key);
+                    //bool equality = comparer.Equals(key, entries[elementNext].Key);
 
-                    if (equality)
-                    {
-                        return true;
-                    }
+                    //if (equality)
+                    //{
+                    //    return true;
+                    //}
+                    return true;
                 }
-                elementNext = entries[elementNext].next;
+                //elementNext = entries[elementNext].next;
+                elementNext = entry.next;
             }
 
             return false;
@@ -529,15 +499,19 @@ namespace MySimpleDictionaryBlazorApp.Model
         {
             foreach (Entry entry in entries)
             {
-                if (entry.next > -2)
+                //if (entry.next > -2)
+                //{
+                //    if (entry.Value != null)
+                //    {
+                //        if (entry.Value.Equals(value))
+                //        {
+                //            return true;
+                //        }
+                //    }
+                //}
+                if (entry.next > -2 && entry.Value != null && entry.Value.Equals(value))
                 {
-                    if (entry.Value != null)
-                    {
-                        if (entry.Value.Equals(value))
-                        {
-                            return true;
-                        }
-                    }
+                    return true;
                 }
             }
             return false;
@@ -556,48 +530,44 @@ namespace MySimpleDictionaryBlazorApp.Model
 
             int current = buckets[bucketIndex] - 1;
             int before = -1;
-            
-            //prvo proverimo prvi element on ako nije bice pokazivac na before, ako jeste samo ce buckets[bucketIndex] = entries[next].next
-            if (entries[current].HashCode == hashCode)
-            {
-                bool equality = comparer.Equals(entries[current].Key, key);
 
-                if (equality)
+            //nema elementa koji treba obrisati
+            if (current == -1)
+            {
+                return false;
+            }
+
+            Entry currentEntry = entries[current];
+            if (currentEntry.HashCode == hashCode && comparer.Equals(currentEntry.Key, key))
+            {
+                buckets[bucketIndex] = currentEntry.next + 1;
+                entries[current].next = startFreeList - freeList;
+                freeCount++;
+                freeList = current;
+                numberOfEntries--;
+                return true;
+            }
+            else
+            {
+                //current postaje before
+                before = current;
+                current = currentEntry.next;
+            }
+
+            while (current != -1)
+            {
+                currentEntry = entries[current];
+                if (currentEntry.HashCode == hashCode && comparer.Equals(currentEntry.Key, key))
                 {
-                    buckets[bucketIndex] = entries[current].next + 1;
+                    entries[before].next = currentEntry.next;
                     entries[current].next = startFreeList - freeList;
                     freeCount++;
                     freeList = current;
                     numberOfEntries--;
                     return true;
                 }
-            }
-            else
-            {
-                //current postaje before
                 before = current;
-                current = entries[current].next;
-            }
-
-            while (current != -1)
-            {
-                
-                if (entries[current].HashCode == hashCode)
-                {
-                    bool equalityCurrent = comparer.Equals(entries[current].Key, key);
-
-                    if (equalityCurrent)
-                    {
-                        buckets[bucketIndex] = entries[current].next + 1;
-                        entries[current].next = startFreeList - freeList;
-                        freeCount++;
-                        freeList = current;
-                        numberOfEntries--;
-                        return true;
-                    }
-                }
-                before = current;
-                current = entries[current].next;
+                current = currentEntry.next;
             }
 
             return false;
@@ -606,14 +576,14 @@ namespace MySimpleDictionaryBlazorApp.Model
         public bool Remove(TKey key, out TValue value)
         {
             value = default(TValue);
-            bool isRemoved = Remove(key);
 
-            if (isRemoved)
+            if (Remove(key))
             {
                 value = entries[freeList].Value;
+                return true;
             }
 
-            return isRemoved;
+            return false;
         }
 
         public void Clear()
